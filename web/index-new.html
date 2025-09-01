@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM客户管理系统</title>
+    <link rel="stylesheet" href="./styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CRM客户管理系统</h1>
+            
+            <div class="import-section">
+                <div class="import-title">Excel数据导入</div>
+                <form class="import-form" id="uploadForm" enctype="multipart/form-data">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="excelFile" accept=".xlsx,.xls" required>
+                        <label for="excelFile" class="file-input-label" id="fileLabel">
+                            📁 选择Excel文件
+                        </label>
+                    </div>
+                    <button type="submit" class="import-btn" id="importBtn" disabled>
+                        📤 上传并导入
+                    </button>
+                </form>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="import-help">
+                    支持格式：.xlsx, .xls | 自动识别Excel类型：销售记录(53列)、微信客户(14列)<br>
+                    <strong>注意：请确保后端API服务正常运行并已配置代理</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 搜索客户名称、联系人或手机号...">
+                <button onclick="searchCustomers()" class="btn btn-primary">
+                    🔍 搜索
+                </button>
+                <button onclick="loadCustomers()" class="btn btn-secondary">
+                    🔄 刷新数据
+                </button>
+            </div>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="table-container">
+            <div id="loading" class="loading">正在加载客户数据...</div>
+            <table id="customerTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>客户名称</th>
+                        <th>联系人</th>
+                        <th>手机号</th>
+                        <th>客户微信</th>
+                        <th>地址信息</th>
+                        <th>客户状态</th>
+                        <th>销售员</th>
+                        <th>导入来源</th>
+                        <th>备注</th>
+                        <th>创建时间</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination" style="display: none;">
+            <button onclick="previousPage()" class="btn btn-primary" id="prevBtn">
+                ⬅️ 上一页
+            </button>
+            <span class="page-info" id="pageInfo"></span>
+            <button onclick="nextPage()" class="btn btn-primary" id="nextBtn">
+                下一页 ➡️
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import ExcelImport from './modules/excel-import.js';
+        import CustomerList from './modules/customer-list.js';
+        
+        // 初始化模块
+        const excelImport = new ExcelImport();
+        const customerList = new CustomerList();
+        
+        // 页面可见性变化时重新加载数据
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && !excelImport.isUploading) {
+                customerList.loadCustomers(customerList.currentPage, customerList.currentSearch);
+            }
+        });
+    </script>
+</body>
+</html>

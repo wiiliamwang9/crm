@@ -1,0 +1,550 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 头部样式 */
+.header {
+    background: linear-gradient(135deg, #4A90E2, #5D9CEC);
+    color: white;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    min-height: 48px;
+}
+
+.back-btn, .close-btn, .menu-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.back-btn:hover, .close-btn:hover, .menu-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 500;
+    flex: 1;
+    text-align: center;
+}
+
+.search-section {
+    padding: 0 16px 16px;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 24px;
+    background-color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    outline: none;
+    transition: background-color 0.2s;
+}
+
+.search-input:focus {
+    background-color: white;
+}
+
+.cancel-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* 主要内容区域 */
+.main-content {
+    flex: 1;
+    padding: 0 16px 80px;
+    overflow-y: auto;
+}
+
+/* 搜索历史样式 */
+.search-history {
+    margin: 20px 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.section-header h2 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+}
+
+.clear-history {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.history-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.today-count {
+    background-color: #E8F4FD;
+    color: #4A90E2;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* 标签样式 */
+.tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #f0f0f0;
+    color: #666;
+    border-radius: 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.tag:hover {
+    background-color: #e0e0e0;
+}
+
+.tag.selected {
+    background-color: #4A90E2;
+    color: white;
+}
+
+/* 标签分组样式 */
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.filter-label {
+    font-weight: 500;
+    color: #666;
+    margin-right: 4px;
+    white-space: nowrap;
+}
+
+.empty-tag {
+    color: #999;
+    font-style: italic;
+}
+
+.loading {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+.error-message {
+    text-align: center;
+    color: #f56565;
+    padding: 20px;
+}
+
+.no-data {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+
+/* 搜索历史标签样式 - 使用浅蓝底色 */
+.history-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #E8F4FD;
+    color: #4A90E2;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+.history-tag:hover {
+    background-color: #D1E9FC;
+    transform: translateY(-1px);
+}
+
+/* 筛选区域样式 */
+.filter-section {
+    margin: 20px 0;
+}
+
+.filter-section h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.filter-group {
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-label {
+    font-size: 14px;
+    color: #666;
+    min-width: 48px;
+    font-weight: 500;
+}
+
+/* 搜索结果样式 */
+.search-results {
+    margin-top: 20px;
+}
+
+.search-results.hidden {
+    display: none;
+}
+
+.results-header {
+    margin: 20px 0 12px;
+}
+
+.results-header h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+}
+
+.result-list {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #ddd;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.user-detail {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.user-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag-blue {
+    background-color: #E3F2FD;
+    color: #1976D2;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.tag-green {
+    background-color: #E8F5E8;
+    color: #388E3C;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.tag-orange {
+    background-color: #FFF3E0;
+    color: #F57C00;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+/* 底部导航样式 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    padding: 8px 0;
+    z-index: 99;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #666;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.nav-item:hover {
+    color: #4A90E2;
+}
+
+.nav-icon {
+    font-size: 24px;
+    margin-bottom: 2px;
+}
+
+.nav-item span {
+    font-size: 12px;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+    .header-content {
+        padding: 10px 12px;
+    }
+    
+    .main-content {
+        padding: 0 12px 80px;
+    }
+    
+    .search-input {
+        font-size: 16px;
+        padding: 10px 14px;
+    }
+    
+    .filter-group {
+        gap: 6px;
+    }
+    
+    .tag {
+        padding: 4px 10px;
+        font-size: 13px;
+    }
+    
+    .result-item {
+        padding: 12px;
+    }
+    
+    .avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .user-name {
+        font-size: 15px;
+    }
+    
+    .user-detail {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    .filter-label {
+        min-width: 40px;
+        font-size: 13px;
+    }
+    
+    .tag {
+        font-size: 12px;
+        padding: 3px 8px;
+    }
+    
+    .today-count {
+        font-size: 13px;
+        padding: 5px 10px;
+    }
+}
+
+/* CSS变量定义 */
+:root {
+    --lighttextcolor-white: rgba(255, 255, 255, 1);
+    --lighttextcolor-text-1: rgba(29, 33, 41, 1);
+    --lighttextcolor-text-3: rgba(134, 144, 156, 1);
+    --lightprimaryprimary-6: rgba(22, 93, 255, 1);
+    --lightprimaryprimary-1: rgba(232, 243, 255, 1);
+    --lightsuccesssuccess-6: rgba(0, 180, 42, 1);
+    --lightsuccesssuccess-1: rgba(232, 255, 234, 1);
+    --lightwarningwarning-6: rgba(255, 125, 0, 1);
+    --lightwarningwarning-1: rgba(255, 247, 232, 1);
+    --lighttextcolor-text-2: rgba(78, 89, 105, 1);
+    --lightlinecolor-border-2: rgba(229, 230, 235, 1);
+    --lightlinecolor-border-4: rgba(134, 144, 156, 1);
+    --lightprimaryprimary-9: rgba(3, 26, 121, 1);
+    --color-text-2: rgba(78, 89, 105, 1);
+    --primary-6: rgba(22, 93, 255, 1);
+}
+
+/* 新的底部导航样式 */
+.view-15 {
+    display: flex;
+    align-items: flex-start;
+    gap: 34px;
+    padding: 12px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    z-index: 99;
+}
+.frame-22 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    position: relative;
+    flex: 1;
+    flex-grow: 1;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.frame-22:hover {
+    background-color: rgba(22, 93, 255, 0.1);
+}
+
+.frame-22:active {
+    background-color: rgba(22, 93, 255, 0.2);
+}
+
+/* 特别为客户按钮添加蓝色底色效果 */
+.frame-22:nth-child(2) {
+    background-color: rgba(22, 93, 255, 0.15);
+}
+
+.frame-22:nth-child(2):hover {
+    background-color: rgba(22, 93, 255, 0.25);
+}
+
+.frame-22:nth-child(2):active {
+    background-color: rgba(22, 93, 255, 0.35);
+}
+.img-3 {
+    position: relative;
+    width: 20px;
+    height: 20px;
+}
+.text-wrapper-23 {
+    color: var(--lighttextcolor-text-2);
+    font-size: 12px;
+    line-height: normal;
+    position: relative;
+    width: fit-content;
+    font-family: "Inter", Helvetica, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+.text-wrapper-24 {
+    width: fit-content;
+    color: var(--lightprimaryprimary-6);
+    font-size: 12px;
+    line-height: normal;
+    position: relative;
+    font-family: "Inter", Helvetica, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+/* 安全区域适配 */
+@supports (padding: max(0px)) {
+    .header {
+        padding-top: max(0px, env(safe-area-inset-top));
+    }
+    
+    .view-15 {
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+}

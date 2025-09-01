@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="globals.css" />
+    <link rel="stylesheet" href="styleguide.css" />
+    <link rel="stylesheet" href="homepage.css" />
+    <script src="../config/api-config.js"></script>
+  </head>
+  <body>
+    <div class="screen">
+      <div class="view">
+        <div class="div">
+          <img class="img" src="../statics/white_left.svg" />
+          <div class="text-wrapper">九香客户管理系统</div>
+          <img class="img" src="../statics/1white_more-one.svg" />
+        </div>
+      </div>
+      <!-- <div class="view-2">
+        <img class="img-2" src="https://c.animaapp.com/mewiuc6y0Nbcsg/img/alert-circle.svg" />
+        <div class="text-wrapper-2">本系统为体验版，请不要正式使用！</div>
+        <img class="img-2" src="https://c.animaapp.com/mewiuc6y0Nbcsg/img/x.svg" />
+      </div> -->
+      <div class="view-3">
+        <div class="view-4">
+          <img class="image-2" src="https://c.animaapp.com/mewiuc6y0Nbcsg/img/---11.svg" />
+          <div class="view-5">
+            <div class="view-6">
+              <div class="text-wrapper-3">徐小二</div>
+              <div class="text-wrapper-4">|</div>
+              <div class="text-wrapper-5">四川一手货缘</div>
+            </div>
+            <div class="view-7">
+              <div class="div-wrapper"><div class="text-wrapper-6">今日营业额 10</div></div>
+              <div class="div-wrapper"><div class="text-wrapper-6">今日跟进 10</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="view-8" onclick="window.location.href='../query/query_target.html'" style="cursor: pointer;">
+          <img class="img-3" src="https://c.animaapp.com/mewiuc6y0Nbcsg/img/search.svg" />
+          <div class="text-wrapper-7">搜索客户...</div>
+        </div>
+      </div>
+      <div class="view-9">
+        <div class="view-10">
+          <img class="img-2" src="https://c.animaapp.com/mewiuc6y0Nbcsg/img/---10.svg" />
+          <div class="frame">
+            <div class="text-wrapper-8">今日待跟进</div>
+            <div class="view-11"><div class="text-wrapper-9" id="today-count">0</div></div>
+          </div>
+          <div class="view-12">
+            <div class="text-wrapper-10">查看全部</div>
+            <img class="img-3" src="https://c.animaapp.com/mewiuc6y0Nbcsg/img/chevrons-right.svg" />
+          </div>
+        </div>
+        <div class="view-13">
+          <div class="filter-option active" data-filter="全部"><div class="text-wrapper-11">全部</div></div>
+          <div class="filter-option" data-filter="待办"><div class="text-wrapper-12">待办</div></div>
+          <div class="filter-option" data-filter="定期"><div class="text-wrapper-12">定期</div></div>
+          <div class="filter-option" data-filter="已发样"><div class="text-wrapper-12">已发样</div></div>
+          <div class="filter-option" data-filter="已发货"><div class="text-wrapper-12">已发货</div></div>
+        </div>
+        <div class="view-14" id="today-customers-list">
+          <!-- 今日待跟进客户列表将通过JavaScript动态加载 -->
+        </div>
+      </div>
+      <div class="view-21">
+        <div class="view-10">
+          <img class="img-2" src="https://c.animaapp.com/mewiuc6y0Nbcsg/img/calendar.svg" />
+          <div class="frame">
+            <div class="text-wrapper-8">近期待跟进</div>
+            <div class="view-11"><div class="text-wrapper-9" id="upcoming-count">0</div></div>
+          </div>
+          <div class="view-12">
+            <div class="text-wrapper-10">查看全部</div>
+            <img class="img-3" src="https://c.animaapp.com/mewiuc6y0Nbcsg/img/chevrons-right.svg" />
+          </div>
+        </div>
+        <div class="view-13">
+          <div class="filter-option active" data-filter="全部"><div class="text-wrapper-11">全部</div></div>
+          <div class="filter-option" data-filter="半年未下单"><div class="text-wrapper-12">半年未下单</div></div>
+          <div class="filter-option" data-filter="一直未下单"><div class="text-wrapper-12">一直未下单</div></div>
+        </div>
+        <div class="view-14" id="upcoming-customers-list">
+          <!-- 近期待跟进客户列表将通过JavaScript动态加载 -->
+        </div>
+      </div>
+      <div class="view-22">
+        <div class="frame-12">
+          <img class="img-1" src="../statics/home.svg" />
+          <div class="text-wrapper-21">首页</div>
+        </div>
+        <div class="frame-12" onclick="window.location.href='../customer/customer.html'" style="cursor: pointer;">
+          <img class="img-3" src="../statics/personal-collection.svg" width="22" height="22" />
+          <div class="text-wrapper-22">客户</div>
+        </div>
+        <div class="frame-12">
+          <img class="img-3" src="../statics/optional.svg" width="22" height="22" />
+          <div class="text-wrapper-22">业绩</div>
+        </div>
+        <div class="frame-12">
+          <img class="img-3" src="../statics/config.svg" width="22" height="22" />
+          <div class="text-wrapper-22">设置</div>
+        </div>
+      </div>
+    </div>
+    <script src="homepage.js"></script>
+    <script>
+      // 添加全局错误处理来捕获runtime.lastError
+      window.addEventListener('error', function(e) {
+        if (e.message && e.message.includes('runtime.lastError')) {
+          // 静默处理runtime.lastError，这通常是浏览器扩展冲突
+          e.preventDefault();
+          return false;
+        }
+      });
+      
+      // 捕获未处理的Promise rejection
+      window.addEventListener('unhandledrejection', function(e) {
+        if (e.reason && e.reason.message && e.reason.message.includes('runtime.lastError')) {
+          e.preventDefault();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+:root {
+  --color-text-2: rgba(78, 89, 105, 1);
+  --primary-6: rgba(22, 93, 255, 1);
+  --lighttextcolor-text-3: rgba(134, 144, 156, 1);
+  --lightlinecolor-border-4: rgba(134, 144, 156, 1);
+  --lighttextcolor-text-4: rgba(201, 205, 212, 1);
+  --lightfillcolor-fill-4: rgba(201, 205, 212, 1);
+  --lighttextcolor-white: rgba(255, 255, 255, 1);
+  --lightfillcolor-fill-2: rgba(242, 243, 245, 1);
+  --lighttextcolor-text-1: rgba(29, 33, 41, 1);
+  --lighttextcolor-text-2: rgba(78, 89, 105, 1);
+  --lightprimaryprimary-6: rgba(22, 93, 255, 1);
+  --lightprimaryprimary-1: rgba(232, 243, 255, 1);
+  --lightsuccesssuccess-6: rgba(0, 180, 42, 1);
+  --lightsuccesssuccess-1: rgba(232, 255, 234, 1);
+  --lightwarningwarning-6: rgba(255, 125, 0, 1);
+  --lightwarningwarning-1: rgba(255, 247, 232, 1);
+  --lightfillcolor-fill-1: rgba(247, 248, 250, 1);
+}
