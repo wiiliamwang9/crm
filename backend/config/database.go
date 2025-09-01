@@ -21,4 +21,3 @@ func ConnectDatabase() {
 	fmt.Println("Database connected successfully")
 	DB = database
 }
-
