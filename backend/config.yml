@@ -1,0 +1,24 @@
+# CRM系统配置文件
+
+# 数据库配置
+database:
+  host: db.lamdar.cn
+  user: postgres
+  password: tpg1688
+  dbname: crm
+  port: 9524
+  sslmode: disable
+  timezone: Asia/Shanghai
+  encoding: UTF8
+
+# 服务器配置
+server:
+  port: 8081
+  mode: debug  # debug, release, test
+  web_path: ../web
+
+# 静态文件配置
+static:
+  enable_target_route: true
+  enable_config_route: true
+  enable_health_check: true
