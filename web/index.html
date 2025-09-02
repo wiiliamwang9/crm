@@ -3,783 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM客户管理系统</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            color: #333;
-            margin-bottom: 24px;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .import-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
-
-        .import-title {
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .import-title::before {
-            content: "📊";
-            font-size: 20px;
-        }
-
-        .import-form {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 10px 16px;
-            border: 2px dashed rgba(255, 255, 255, 0.5);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-block;
-            font-weight: 500;
-            min-width: 200px;
-            text-align: center;
-        }
-
-        .file-input-label:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.8);
-            transform: translateY(-2px);
-        }
-
-        .file-selected {
-            background: rgba(40, 167, 69, 0.2);
-            border-color: rgba(40, 167, 69, 0.8);
-        }
-
-        .import-btn {
-            background: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
-        }
-
-        .import-btn:hover:not(:disabled) {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
-        }
-
-        .import-btn:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .import-help {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            margin-top: 8px;
-        }
-
-        .controls {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .search-box {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        input[type="text"] {
-            padding: 10px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
-            font-size: 14px;
-            min-width: 300px;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #545b62;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        th {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            font-weight: 600;
-            color: #495057;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        tr:nth-child(even) {
-            background-color: rgba(0,0,0,0.02);
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 24px;
-            gap: 12px;
-            background: white;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .page-info {
-            color: #6c757d;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px;
-            color: #6c757d;
-            font-size: 16px;
-        }
-
-        .loading::before {
-            content: "⏳";
-            margin-right: 8px;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .message {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-            display: none;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .error::before {
-            content: "❌";
-            margin-right: 8px;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .success::before {
-            content: "✅";
-            margin-right: 8px;
-        }
-
-        .warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .warning::before {
-            content: "⚠️";
-            margin-right: 8px;
-        }
-
-        .array-field {
-            max-width: 200px;
-            word-wrap: break-word;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background-color: #e9ecef;
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 8px;
-            display: none;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #007bff, #0056b3);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-            width: 0%;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 12px;
-            }
-            
-            .import-form {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .file-input-label {
-                min-width: auto;
-            }
-            
-            .search-box {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            input[type="text"] {
-                min-width: auto;
-            }
-        }
-    </style>
+    <title>客户信息管理</title>
+    <link rel="stylesheet" href="css/common.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>CRM客户管理系统</h1>
-            
-            <div class="import-section">
-                <div class="import-title">Excel数据导入</div>
-                <form class="import-form" id="uploadForm" enctype="multipart/form-data">
-                    <div class="file-input-wrapper">
-                        <input type="file" id="excelFile" accept=".xlsx,.xls" required>
-                        <label for="excelFile" class="file-input-label" id="fileLabel">
-                            📁 选择Excel文件
-                        </label>
+        <!-- 头部区域 -->
+        <header class="header">
+            <div class="user-info">
+                <div class="avatar-container">
+                    <div class="avatar">
+                        <img src="./image/avatar.png" alt="">
+                        <span class="crown">
+                            <img src="./image/crown.png" alt="">
+                        </span>
                     </div>
-                    <button type="submit" class="import-btn" id="importBtn" disabled>
-                        📤 上传并导入
-                    </button>
-                </form>
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-fill" id="progressFill"></div>
+                    
                 </div>
-                <div class="import-help">
-                    支持格式：.xlsx, .xls | 自动识别Excel类型：销售记录(53列)、微信客户(14列)<br>
-                    <strong>注意：请确保后端API服务正常运行并已配置代理</strong>
+                <div class="user-details">
+                    <div class="username">
+                        <p>徐小二</p>
+                        <p>|</p>
+                        <p>四川一手货源</p>
+                    </div>
+                    <div class="stats">
+                        <span class="stat-item">今日营业额 10</span>
+                        <span class="stat-item">今日跟进 10</span>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="controls">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 搜索客户名称、联系人或手机号...">
-                <button onclick="searchCustomers()" class="btn btn-primary">
-                    🔍 搜索
-                </button>
-                <button onclick="loadCustomers()" class="btn btn-secondary">
-                    🔄 刷新数据
-                </button>
+            
+            <!-- 搜索框 -->
+            <div class="search-container">
+                <div class="search-box">
+                    <span class="search-icon">
+                        <img src="./image/search.png" alt="">
+                    </span>
+                    <input type="text" placeholder="搜索客户...">
+                </div>
             </div>
-        </div>
+        </header>
 
-        <div id="message" class="message"></div>
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 今日待跟进标题栏 -->
+            <div class="follow-up-header">
+                <div class="left-section">
+                    <span class="file-icon">
+                        <img src="./image/record.png" alt="">
+                    </span>
+                    <p>今日待跟进</p>
+                    <span class="badge">20</span>
+                </div>
+                <div class="view-all"><span>查看全部</span>
+                    <img src="./image/chevrons-right.png" alt="">
 
-        <div class="table-container">
-            <div id="loading" class="loading">正在加载客户数据...</div>
-            <table id="customerTable" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>序号</th>
-                        <th>客户名称</th>
-                        <th>联系人</th>
-                        <th>手机号</th>
-                        <th>客户微信</th>
-                        <th>地址信息</th>
-                        <th>客户状态</th>
-                        <th>销售员</th>
-                        <th>导入来源</th>
-                        <th>备注</th>
-                        <th>创建时间</th>
-                    </tr>
-                </thead>
-                <tbody id="customerTableBody">
-                </tbody>
-            </table>
-        </div>
+                </div>
+            </div>
 
-        <div class="pagination" id="pagination" style="display: none;">
-            <button onclick="previousPage()" class="btn btn-primary" id="prevBtn">
-                ⬅️ 上一页
-            </button>
-            <span class="page-info" id="pageInfo"></span>
-            <button onclick="nextPage()" class="btn btn-primary" id="nextBtn">
-                下一页 ➡️
-            </button>
+            <!-- 导航标签 -->
+            <div class="nav-tabs">
+                <button class="tab-btn active">全部</button>
+                <button class="tab-btn">待办</button>
+                <button class="tab-btn">定期</button>
+                <button class="tab-btn">已发样</button>
+                <button class="tab-btn">已发货</button>
+            </div>
+
+            <!-- 客户列表 -->
+            <div class="customer-list">
+                <!-- 客户项目1 -->
+                <div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                   <p>徐小二</p>
+                        <p class="line">|</p>
+                        <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                   <p>徐小二</p>
+                        <p class="line">|</p>
+                        <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                   <p>徐小二</p>
+                        <p class="line">|</p>
+                        <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               
+            </div>
+
+            <!-- 近期待跟进 -->
+            <div class="follow-up-header">
+                <div class="left-section">
+                    <span class="file-icon">
+                        <img src="./image/record.png" alt="">
+                    </span>
+                    <p>近期待跟进</p>
+                    <span class="badge">20</span>
+                </div>
+                <div class="view-all"><span>查看全部</span>
+                    <img src="./image/chevrons-right.png" alt="">
+
+                </div>
+            </div>
+
+            <!-- 客户列表 -->
+                <div class="customer-list">
+                <!-- 客户项目1 -->
+                <div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                   <p>徐小二</p>
+                        <p class="line">|</p>
+                        <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                   <p>徐小二</p>
+                        <p class="line">|</p>
+                        <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                   <p>徐小二</p>
+                        <p class="line">|</p>
+                        <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 底部导航 -->
+        <div class="bottom-navigation">
+            <div class="nav-item">
+                <img class="nav-icon" src="./image/home.svg" />
+                <div class="nav-label-active">首页</div>
+            </div>
+            <div class="nav-item" onclick="window.location.href='../customer/customer.html'" style="cursor: pointer;">
+                <img class="nav-icon" src="./image/customers.svg" width="22" height="22" />
+                <div class="nav-label">客户</div>
+            </div>
+            <div class="nav-item">
+                <img class="nav-icon" src="./image/optional.svg" width="22" height="22" />
+                <div class="nav-label">业绩</div>
+            </div>
+            <div class="nav-item">
+                <img class="nav-icon" src="./image/config.svg" width="22" height="22" />
+                <div class="nav-label">设置</div>
+            </div>
         </div>
     </div>
-
-    <script>
-        let currentPage = 1;
-        let totalPages = 1;
-        let currentSearch = '';
-        let isUploading = false;
-        
-        // 使用相对路径调用API，需要在Web服务器配置代理到8081端口
-        const API_BASE = '/api/v1';
-
-        // 文件选择处理
-        document.getElementById('excelFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const label = document.getElementById('fileLabel');
-            const importBtn = document.getElementById('importBtn');
-            
-            if (file) {
-                label.textContent = `📄 ${file.name}`;
-                label.classList.add('file-selected');
-                importBtn.disabled = false;
-            } else {
-                label.textContent = '📁 选择Excel文件';
-                label.classList.remove('file-selected');
-                importBtn.disabled = true;
-            }
-        });
-
-        // Excel上传处理
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (isUploading) return;
-            
-            const fileInput = document.getElementById('excelFile');
-            const file = fileInput.files[0];
-            const importBtn = document.getElementById('importBtn');
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            
-            if (!file) {
-                showMessage('请选择Excel文件', 'error');
-                return;
-            }
-            
-            // 验证文件类型
-            const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
-            const validExtensions = ['.xlsx', '.xls'];
-            const fileName = file.name.toLowerCase();
-            const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
-            
-            if (!validTypes.includes(file.type) && !hasValidExtension) {
-                showMessage('请选择有效的Excel文件（.xlsx或.xls格式）', 'error');
-                return;
-            }
-            
-            // 检查文件大小（最大10MB）
-            if (file.size > 10 * 1024 * 1024) {
-                showMessage('文件大小不能超过10MB', 'error');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            // 开始上传
-            isUploading = true;
-            importBtn.disabled = true;
-            importBtn.innerHTML = '⏳ 正在上传...';
-            progressBar.style.display = 'block';
-            progressFill.style.width = '0%';
-            
-            // 模拟进度条（实际项目中应该使用真实的上传进度）
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                if (progress < 90) {
-                    progress += Math.random() * 10;
-                    progressFill.style.width = Math.min(progress, 90) + '%';
-                }
-            }, 200);
-            
-            try {
-                const response = await fetch(`${API_BASE}/upload-excel`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                clearInterval(progressInterval);
-                progressFill.style.width = '100%';
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showMessage(`导入成功！${result.message}`, 'success');
-                    if (result.warnings && result.warnings.length > 0) {
-                        console.warn('导入警告:', result.warnings);
-                        showMessage(`导入完成，但有 ${result.warnings.length} 个警告，请查看控制台`, 'warning');
-                    }
-                    
-                    // 重置表单
-                    fileInput.value = '';
-                    document.getElementById('fileLabel').textContent = '📁 选择Excel文件';
-                    document.getElementById('fileLabel').classList.remove('file-selected');
-                    
-                    // 刷新数据
-                    setTimeout(() => {
-                        loadCustomers();
-                    }, 1000);
-                    
-                } else {
-                    showMessage(`上传失败：${result.error || '未知错误'}`, 'error');
-                }
-                
-            } catch (error) {
-                clearInterval(progressInterval);
-                console.error('上传错误:', error);
-                showMessage(`上传错误：${error.message || '网络连接失败'}`, 'error');
-            } finally {
-                // 恢复按钮状态
-                isUploading = false;
-                importBtn.disabled = fileInput.files.length === 0;
-                importBtn.innerHTML = '📤 上传并导入';
-                
-                // 隐藏进度条
-                setTimeout(() => {
-                    progressBar.style.display = 'none';
-                    progressFill.style.width = '0%';
-                }, 2000);
-            }
-        });
-
-        async function loadCustomers(page = 1, search = '') {
-            try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('customerTable').style.display = 'none';
-                document.getElementById('pagination').style.display = 'none';
-                
-                const url = `${API_BASE}/customers?page=${page}&limit=20${search ? '&search=' + encodeURIComponent(search) : ''}`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('API服务未启动或地址错误');
-                    }
-                    throw new Error(`获取客户数据失败 (${response.status})`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.customers && Array.isArray(data.customers)) {
-                    renderCustomers(data.customers);
-                    updatePagination(data.page || page, data.total || 0, data.limit || 20);
-                    
-                    currentPage = data.page || page;
-                    currentSearch = search;
-                    
-                    document.getElementById('customerTable').style.display = 'table';
-                    document.getElementById('pagination').style.display = 'flex';
-                } else {
-                    throw new Error('返回数据格式错误');
-                }
-                
-            } catch (error) {
-                console.error('加载客户数据错误:', error);
-                showMessage(`加载数据失败：${error.message}`, 'error');
-                
-                // 显示空表格
-                document.getElementById('customerTableBody').innerHTML = 
-                    '<tr><td colspan="11" style="text-align: center; color: #6c757d; padding: 40px;">暂无数据或服务连接失败</td></tr>';
-                document.getElementById('customerTable').style.display = 'table';
-                
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
-
-        function renderCustomers(customers) {
-            const tbody = document.getElementById('customerTableBody');
-            tbody.innerHTML = '';
-            
-            if (!customers || customers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #6c757d; padding: 40px;">暂无客户数据</td></tr>';
-                return;
-            }
-            
-            customers.forEach((customer, index) => {
-                const row = document.createElement('tr');
-                
-                // 计算序号，每页都从1开始
-                const serialNumber = index + 1;
-                
-                const levelText = {
-                    0: '未分级', 1: 'S级', 2: 'A级', 3: 'B级', 4: 'C级', 10: 'X级'
-                }[customer.level] || '未知';
-                
-                const stateText = {
-                    0: '未知', 1: '未开发', 2: '开发中', 3: '已开发', 
-                    4: '已拉黑', 5: '已倒闭', 6: '同事', 7: '叛徒', 8: '同行'
-                }[customer.state] || '未知';
-                
-                const addressInfo = [customer.province, customer.city, customer.district, customer.address]
-                    .filter(Boolean).join(' ');
-                
-                const phones = customer.phones && Array.isArray(customer.phones) 
-                    ? customer.phones.join(', ') : (customer.phones || '');
-                
-                const wechats = customer.wechats && Array.isArray(customer.wechats) 
-                    ? customer.wechats.join(', ') : (customer.wechats || '');
-                
-                // 优先显示销售员姓名，如果没有则显示销售员ID
-                const sellerDisplay = customer.saller_name || 
-                    (customer.sellers && Array.isArray(customer.sellers) 
-                        ? customer.sellers.join(', ') : (customer.sellers || ''));
-                
-                const createdAt = customer.created_at 
-                    ? new Date(customer.created_at).toLocaleDateString('zh-CN') 
-                    : '';
-                
-                row.innerHTML = `
-                    <td>${serialNumber}</td>
-                    <td>${customer.name || ''}</td>
-                    <td>${customer.contact_name || ''}</td>
-                    <td class="array-field">${phones}</td>
-                    <td class="array-field">${wechats}</td>
-                    <td class="array-field" title="${addressInfo}">${addressInfo}</td>
-                    <td>${stateText}</td>
-                    <td>${sellerDisplay}</td>
-                    <td>${customer.import_source || customer.source || ''}</td>
-                    <td title="${customer.remark || ''}">${(customer.remark || '').substring(0, 30)}${(customer.remark || '').length > 30 ? '...' : ''}</td>
-                    <td>${createdAt}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function updatePagination(page, total, limit) {
-            totalPages = Math.ceil(total / limit);
-            const pageInfo = document.getElementById('pageInfo');
-            pageInfo.textContent = `第 ${page} 页 / 共 ${totalPages} 页 (总计 ${total} 条记录)`;
-            
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            
-            prevBtn.disabled = page <= 1;
-            nextBtn.disabled = page >= totalPages;
-            
-            prevBtn.style.opacity = page <= 1 ? '0.5' : '1';
-            nextBtn.style.opacity = page >= totalPages ? '0.5' : '1';
-        }
-
-        function searchCustomers() {
-            const search = document.getElementById('searchInput').value.trim();
-            loadCustomers(1, search);
-        }
-
-        function previousPage() {
-            if (currentPage > 1) {
-                loadCustomers(currentPage - 1, currentSearch);
-            }
-        }
-
-        function nextPage() {
-            if (currentPage < totalPages) {
-                loadCustomers(currentPage + 1, currentSearch);
-            }
-        }
-
-        function showMessage(message, type = 'success') {
-            const messageDiv = document.getElementById('message');
-            messageDiv.className = `message ${type}`;
-            messageDiv.textContent = message;
-            messageDiv.style.display = 'block';
-            
-            // 自动隐藏消息
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, type === 'error' ? 8000 : 5000);
-        }
-
-        // 搜索框回车事件
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchCustomers();
-            }
-        });
-
-        // 拖拽上传功能
-        const importSection = document.querySelector('.import-section');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            importSection.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            importSection.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            importSection.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight() {
-            importSection.style.transform = 'scale(1.02)';
-            importSection.style.boxShadow = '0 8px 16px rgba(102, 126, 234, 0.3)';
-        }
-
-        function unhighlight() {
-            importSection.style.transform = 'scale(1)';
-            importSection.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.2)';
-        }
-
-        importSection.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            
-            if (files.length > 0) {
-                document.getElementById('excelFile').files = files;
-                document.getElementById('excelFile').dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        }
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 延迟加载数据，给后端服务一些启动时间
-            setTimeout(() => {
-                loadCustomers();
-            }, 500);
-        });
-
-        // 页面可见性变化时重新加载数据
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden && !isUploading) {
-                loadCustomers(currentPage, currentSearch);
-            }
-        });
-    </script>
+    <script src="../js/common.js"></script>
 </body>
 </html>

@@ -134,35 +134,48 @@ type TodoResponse struct {
 	DaysLeft         int     `json:"days_left"`
 }
 
-// Activity 相关请求响应
-type ActivityCreateRequest struct {
-	CustomerID     uint64       `json:"customer_id" binding:"required"`
-	Kind           ActivityKind `json:"kind" binding:"required"`
-	Title          string       `json:"title" binding:"required,max=255"`
-	Content        string       `json:"content" binding:"required"`
-	Result         string       `json:"result"`
-	Amount         float64      `json:"amount"`
-	Cost           float64      `json:"cost"`
-	Feedback       string       `json:"feedback"`
-	Satisfaction   int          `json:"satisfaction"`
-	Remark         string       `json:"remark"`
-	Duration       *int         `json:"duration"`
-	Location       string       `json:"location"`
-	NextFollowTime *time.Time   `json:"next_follow_time"`
-	Attachments    JSONB        `json:"attachments"`
+// FollowUpRecord 相关请求响应
+// 注意：以下结构体操作的是 follow_up_records 表，该表是从原 activities 表迁移而来
+type FollowUpRecordCreateRequest struct {
+	CustomerID           uint64    `json:"customer_id" binding:"required"`
+	UserID               uint64    `json:"user_id" binding:"required"`
+	Type                 string    `json:"type" binding:"required,max=50"`
+	Title                string    `json:"title" binding:"required,max=255"`
+	Content              string    `json:"content"`
+	Amount               *float64  `json:"amount"`
+	Cost                 *float64  `json:"cost"`
+	Photos               JSONB     `json:"photos"`
+	CustomerSatisfaction *int      `json:"customer_satisfaction"`
+	CustomerFeedback     string    `json:"customer_feedback"`
+	NextFollowContent    string    `json:"next_follow_content"`
+	ParentRecordID       *uint64   `json:"parent_record_id"`
+	FollowUpDate         time.Time `json:"follow_up_date" binding:"required"`
 }
 
-type ActivityResponse struct {
-	Activity
-	UserName     string  `json:"user_name"`
-	CustomerName string  `json:"customer_name"`
-	Content      string  `json:"content"`
-	Result       string  `json:"result"`
-	Amount       float64 `json:"amount"`
-	Cost         float64 `json:"cost"`
-	Feedback     string  `json:"feedback"`
-	Satisfaction int     `json:"satisfaction"`
-	TimeAgo      string  `json:"time_ago"`
+type FollowUpRecordUpdateRequest struct {
+	Type                 *string    `json:"type"`
+	Title                *string    `json:"title"`
+	Content              *string    `json:"content"`
+	Remark               *string    `json:"remark"`
+	Duration             *int       `json:"duration"`
+	Location             *string    `json:"location"`
+	Amount               *float64   `json:"amount"`
+	Cost                 *float64   `json:"cost"`
+	Photos               JSONB      `json:"photos"`
+	CustomerSatisfaction *int       `json:"customer_satisfaction"`
+	CustomerFeedback     *string    `json:"customer_feedback"`
+	NextFollowTime       *time.Time `json:"next_follow_time"`
+	NextFollowContent    *string    `json:"next_follow_content"`
+	ParentRecordID       *uint64    `json:"parent_record_id"`
+	Attachments          JSONB      `json:"attachments"`
+	Data                 JSONB      `json:"data"`
+}
+
+type FollowUpRecordResponse struct {
+	FollowUpRecord
+	UserName     string `json:"user_name"`
+	CustomerName string `json:"customer_name"`
+	TimeAgo      string `json:"time_ago"`
 }
 
 // User 相关请求响应
@@ -263,6 +276,45 @@ type ReminderResponse struct {
 	TodoTitle    string `json:"todo_title"`
 	UserName     string `json:"user_name"`
 	CustomerName string `json:"customer_name"`
+}
+
+// 客户偏好相关请求响应
+type CustomerPreferenceItem struct {
+	ID          string      `json:"id"`          // 偏好项ID
+	Category    string      `json:"category"`    // 偏好分类（如：产品偏好、服务偏好、沟通偏好等）
+	Name        string      `json:"name"`        // 偏好名称
+	Value       interface{} `json:"value"`       // 偏好值（可以是字符串、数字、布尔值等）
+	Description string      `json:"description"` // 偏好描述
+	CreatedAt   time.Time   `json:"created_at"`  // 创建时间
+	UpdatedAt   time.Time   `json:"updated_at"`  // 更新时间
+}
+
+type CustomerPreferenceCreateRequest struct {
+	CustomerID  uint64      `json:"customer_id" binding:"required"`
+	Category    string      `json:"category" binding:"required,max=50"`
+	Name        string      `json:"name" binding:"required,max=100"`
+	Value       interface{} `json:"value" binding:"required"`
+	Description string      `json:"description" binding:"max=500"`
+}
+
+type CustomerPreferenceUpdateRequest struct {
+	Category    *string     `json:"category"`
+	Name        *string     `json:"name"`
+	Value       interface{} `json:"value"`
+	Description *string     `json:"description"`
+}
+
+type CustomerPreferenceResponse struct {
+	CustomerPreferenceItem
+	CustomerID   uint64 `json:"customer_id"`
+	CustomerName string `json:"customer_name"`
+}
+
+type CustomerPreferenceListResponse struct {
+	CustomerID   uint64                   `json:"customer_id"`
+	CustomerName string                   `json:"customer_name"`
+	Preferences  []CustomerPreferenceItem `json:"preferences"`
+	Total        int                      `json:"total"`
 }
 
 // 类型转换辅助函数
@@ -604,36 +656,48 @@ func (dto *TodoLogDTO) FromModel(log *TodoLog) {
 	dto.NewData = log.NewData
 }
 
-// ActivityDTO 跟进记录数据传输对象
-type ActivityDTO struct {
+// FollowUpRecordDTO 跟进记录数据传输对象
+// 注意：该DTO对应的 follow_up_records 表是从原 activities 表迁移而来
+type FollowUpRecordDTO struct {
 	AuditDTO
-	Kind         ActivityKind `gorm:"size:50;not null;index" json:"kind"`
-	Title        string       `gorm:"size:200;not null" json:"title"`
-	Content      string       `gorm:"type:text" json:"content"`
-	CustomerID   uint64       `gorm:"not null;index" json:"customer_id"`
-	Customer     *CustomerDTO `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
-	UserID       uint64       `gorm:"not null;index" json:"user_id"`
-	User         *UserDTO     `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	FollowUpDate *time.Time   `gorm:"index" json:"follow_up_date"`
-	Metadata     JSONB        `gorm:"type:jsonb" json:"metadata"`
+	CustomerID           uint64       `gorm:"not null;index" json:"customer_id"`
+	Customer             *CustomerDTO `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
+	UserID               uint64       `gorm:"not null;index" json:"user_id"`
+	User                 *UserDTO     `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Type                 string       `gorm:"size:50;not null;index" json:"type"`
+	Title                string       `gorm:"size:255;not null" json:"title"`
+	Content              string       `gorm:"type:text" json:"content"`
+	Amount               *float64     `gorm:"type:decimal(15,2)" json:"amount"`
+	Cost                 *float64     `gorm:"type:decimal(15,2)" json:"cost"`
+	Photos               JSONB        `gorm:"type:jsonb" json:"photos"`
+	CustomerSatisfaction *int         `gorm:"check:customer_satisfaction >= 1 AND customer_satisfaction <= 5" json:"customer_satisfaction"`
+	CustomerFeedback     string       `gorm:"type:text" json:"customer_feedback"`
+	NextFollowContent    string       `gorm:"type:text" json:"next_follow_content"`
+	ParentRecordID       *uint64      `gorm:"index" json:"parent_record_id"`
+	FollowUpDate         time.Time    `gorm:"not null;index" json:"follow_up_date"`
 }
 
 // TableName 指定表名
-func (ActivityDTO) TableName() string {
-	return "activities"
+func (FollowUpRecordDTO) TableName() string {
+	return "follow_up_records"
 }
 
 // ToModel 转换为业务模型
-func (dto *ActivityDTO) ToModel() *Activity {
-	activity := &Activity{
-		ID:             uint64(dto.ID),
-		CustomerID:     uint64(dto.CustomerID),
-		UserID:         uint64(dto.UserID),
-		Kind:           dto.Kind,
-		Title:          dto.Title,
-		Remark:         dto.Content,
-		Data:           dto.Metadata,
-		NextFollowTime: dto.FollowUpDate,
+func (dto *FollowUpRecordDTO) ToModel() *FollowUpRecord {
+	return &FollowUpRecord{
+		ID:                   dto.ID,
+		CustomerID:           dto.CustomerID,
+		UserID:               dto.UserID,
+		Kind:                 dto.Type,
+		Title:                dto.Title,
+		Content:              dto.Content,
+		Amount:               dto.Amount,
+		Cost:                 dto.Cost,
+		Photos:               dto.Photos,
+		CustomerSatisfaction: dto.CustomerSatisfaction,
+		CustomerFeedback:     dto.CustomerFeedback,
+		NextFollowContent:    dto.NextFollowContent,
+		ParentRecordID:       dto.ParentRecordID,
 		BaseModel: BaseModel{
 			CreatedAt: dto.CreatedAt,
 			UpdatedAt: dto.UpdatedAt,
@@ -641,27 +705,35 @@ func (dto *ActivityDTO) ToModel() *Activity {
 			IsDeleted: dto.IsDeleted,
 		},
 	}
-	return activity
 }
 
 // FromModel 从业务模型转换
-func (dto *ActivityDTO) FromModel(activity *Activity) {
-	dto.ID = uint64(activity.ID)
-	dto.CreatedAt = activity.CreatedAt
-	dto.UpdatedAt = activity.UpdatedAt
-	dto.IsDeleted = activity.IsDeleted
-	dto.DeletedAt = activity.DeletedAt
-	dto.Kind = activity.Kind
-	dto.Title = activity.Title
-	dto.Content = activity.Remark
-	dto.CustomerID = uint64(activity.CustomerID)
-	dto.UserID = uint64(activity.UserID)
-	dto.FollowUpDate = activity.NextFollowTime
-	dto.Metadata = activity.Data
-	dto.Customer = &CustomerDTO{}
-	dto.Customer.FromModel(&activity.Customer)
-	dto.User = &UserDTO{}
-	dto.User.FromModel(&activity.User)
+func (dto *FollowUpRecordDTO) FromModel(record *FollowUpRecord) {
+	dto.ID = record.ID
+	dto.CustomerID = record.CustomerID
+	dto.UserID = record.UserID
+	dto.Type = record.Kind
+	dto.Title = record.Title
+	dto.Content = record.Content
+	dto.Amount = record.Amount
+	dto.Cost = record.Cost
+	dto.Photos = record.Photos
+	dto.CustomerSatisfaction = record.CustomerSatisfaction
+	dto.CustomerFeedback = record.CustomerFeedback
+	dto.NextFollowContent = record.NextFollowContent
+	dto.ParentRecordID = record.ParentRecordID
+	dto.CreatedAt = record.CreatedAt
+	dto.UpdatedAt = record.UpdatedAt
+	dto.IsDeleted = record.IsDeleted
+	dto.DeletedAt = record.DeletedAt
+	if record.Customer.ID != 0 {
+		dto.Customer = &CustomerDTO{}
+		dto.Customer.FromModel(&record.Customer)
+	}
+	if record.User.ID != 0 {
+		dto.User = &UserDTO{}
+		dto.User.FromModel(&record.User)
+	}
 }
 
 // ReminderDTO 提醒数据传输对象

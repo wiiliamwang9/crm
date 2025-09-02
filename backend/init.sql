@@ -1,66 +1,3 @@
-CREATE TABLE "public"."activities"(
-                                      "id"                    int8 NOT NULL            DEFAULT nextval('activities_id_seq'::regclass),
-                                      "customer_id"           int8 NOT NULL,
-                                      "user_id"               int8 NOT NULL,
-                                      "kind"                  "public"."activity_kind" DEFAULT 'other'::activity_kind,
-                                      "title"                 varchar(255),
-                                      "data"                  jsonb,
-                                      "remark"                text,
-                                      "duration"              int4,
-                                      "location"              varchar(255),
-                                      "next_follow_time"      timestamp(6),
-                                      "attachments"           jsonb,
-                                      "created_at"            timestamp(6)             DEFAULT CURRENT_TIMESTAMP,
-                                      "updated_at"            timestamp(6)             DEFAULT CURRENT_TIMESTAMP,
-                                      "deleted_at"            timestamp(6),
-                                      "is_deleted"            bool                     DEFAULT false,
-                                      "todo_id"               int8,
-                                      "is_regular"            bool                     DEFAULT false,
-                                      "regular_interval_days" int4,
-                                      "is_completed"          bool                     DEFAULT false,
-                                      "completed_at"          timestamp(6),
-                                      CONSTRAINT "activities_pkey" PRIMARY KEY (id),
-                                      CONSTRAINT "activities_todo_id_fkey" FOREIGN KEY (todo_id) REFERENCES todos (id)
-);
-ALTER TABLE "public"."activities" OWNER TO "postgres";
-CREATE INDEX "idx_activities_todo_id" ON "public"."activities" USING btree (todo_id);
-CREATE INDEX "idx_activities_is_regular" ON "public"."activities" USING btree (is_regular);
-CREATE INDEX "idx_activities_is_completed" ON "public"."activities" USING btree (is_completed);
-CREATE INDEX "idx_activities_customer_id" ON "public"."activities" USING btree (customer_id);
-CREATE INDEX "idx_activities_user_id" ON "public"."activities" USING btree (user_id);
-CREATE INDEX "idx_activities_kind" ON "public"."activities" USING btree (kind);
-CREATE INDEX "idx_activities_created_at" ON "public"."activities" USING btree (created_at);
-CREATE INDEX "idx_activities_next_follow_time" ON "public"."activities" USING btree (next_follow_time);
-CREATE INDEX "idx_activities_deleted" ON "public"."activities" USING btree (is_deleted);
-CREATE INDEX "idx_activities_customer_user" ON "public"."activities" USING btree (customer_id, user_id) WHERE (is_deleted = false);
-CREATE INDEX "idx_activities_user_time" ON "public"."activities" USING btree (user_id, created_at) WHERE (is_deleted = false);
-COMMENT ON COLUMN "public"."activities"."id" IS '记录ID';
-COMMENT ON COLUMN "public"."activities"."customer_id" IS '客户ID';
-COMMENT ON COLUMN "public"."activities"."user_id" IS '用户ID';
-COMMENT ON COLUMN "public"."activities"."kind" IS '跟进类型：电话、拜访、邮件、微信、会议、其他';
-COMMENT ON COLUMN "public"."activities"."title" IS '跟进标题';
-COMMENT ON COLUMN "public"."activities"."data" IS '沟通数据，格式：{"content": "沟通内容", "result": "沟通结果"}';
-COMMENT ON COLUMN "public"."activities"."remark" IS '备注';
-COMMENT ON COLUMN "public"."activities"."duration" IS '持续时长（分钟）';
-COMMENT ON COLUMN "public"."activities"."location" IS '地点';
-COMMENT ON COLUMN "public"."activities"."next_follow_time" IS '下次跟进时间';
-COMMENT ON COLUMN "public"."activities"."attachments" IS '附件信息（JSONB格式）';
-COMMENT ON COLUMN "public"."activities"."created_at" IS '创建时间';
-COMMENT ON COLUMN "public"."activities"."updated_at" IS '更新时间';
-COMMENT ON COLUMN "public"."activities"."deleted_at" IS '删除时间（软删除）';
-COMMENT ON COLUMN "public"."activities"."is_deleted" IS '是否删除：false-否，true-是';
-COMMENT
-ON COLUMN "public"."activities"."todo_id" IS '关联的待办ID';
-COMMENT
-ON COLUMN "public"."activities"."is_regular" IS '是否定期跟进';
-COMMENT
-ON COLUMN "public"."activities"."regular_interval_days" IS '定期间隔天数';
-COMMENT
-ON COLUMN "public"."activities"."is_completed" IS '是否完成';
-COMMENT
-ON COLUMN "public"."activities"."completed_at" IS '完成时间';
-COMMENT ON TABLE "public"."activities" IS '跟进记录表';
-
 CREATE TABLE "public"."customers"(
                                      "id"                        int4 NOT NULL DEFAULT nextval('customers_id_seq'::regclass),
                                      "name"                      varchar(256),
@@ -119,18 +56,18 @@ CREATE TABLE "public"."customers"(
                                      "import_source"             varchar(256),
                                      "saller_name"               varchar(256),
                                      "system_tags"               int4[] DEFAULT '{}'::integer[],
-                                     CONSTRAINT "customers_gender_check" CHECK (((gender >= 0) AND (gender <= 2))),
-                                     CONSTRAINT "customers_kind_check" CHECK (((kind >= 0) AND (kind <= 4))),
-                                     CONSTRAINT "customers_level_check" CHECK ((level = ANY (ARRAY[0, 1, 2, 3, 4, 10]))),
                                      CONSTRAINT "customers_pkey" PRIMARY KEY (id),
-                                     CONSTRAINT "customers_state_check" CHECK (((state >= 0) AND (state <= 8)))
+                                     CONSTRAINT "customers_gender_check" CHECK (((gender >= 0) AND (gender <= 2))),
+                                     CONSTRAINT "customers_level_check" CHECK ((level = ANY (ARRAY[0, 1, 2, 3, 4, 10]))),
+                                     CONSTRAINT "customers_state_check" CHECK (((state >= 0) AND (state <= 8))),
+                                     CONSTRAINT "customers_kind_check" CHECK (((kind >= 0) AND (kind <= 4)))
 );
 ALTER TABLE "public"."customers" OWNER TO "postgres";
 CREATE INDEX "idx_status" ON "public"."customers" USING btree (state);
-CREATE INDEX "idx_customers_system_tags" ON "public"."customers" USING gin (system_tags);
+CREATE INDEX "idx_customers_last_order_date" ON "public"."customers" USING btree (last_order_date);
 CREATE INDEX "idx_phone" ON "public"."customers" USING btree (phones);
 CREATE INDEX "idx_wechats" ON "public"."customers" USING btree (wechats);
-CREATE INDEX "idx_customers_last_order_date" ON "public"."customers" USING btree (last_order_date);
+CREATE INDEX "idx_customers_system_tags" ON "public"."customers" USING gin (system_tags);
 CREATE TRIGGER "trg_customers_updated"
     BEFORE UPDATE
     ON "public"."customers"
@@ -197,32 +134,34 @@ COMMENT ON INDEX "public"."idx_phone" IS '电话';
 COMMENT ON INDEX "public"."idx_wechats" IS '微信';
 
 CREATE TABLE "public"."follow_up_records"(
-                                             "id"                    int8 NOT NULL                     DEFAULT nextval('follow_up_records_id_seq'::regclass),
+                                             "id"                    int8 NOT NULL            DEFAULT nextval('follow_up_records_id_seq'::regclass),
                                              "customer_id"           int8 NOT NULL,
                                              "user_id"               int8 NOT NULL,
-                                             "kind"                  "public"."activity_kind_extended" DEFAULT 'other'::activity_kind_extended,
+                                             "kind"                  "public"."activity_kind" DEFAULT 'other'::activity_kind,
                                              "title"                 varchar(255),
-                                             "content"               text,
                                              "data"                  jsonb,
                                              "remark"                text,
                                              "duration"              int4,
                                              "location"              varchar(255),
+                                             "next_follow_time"      timestamp(6),
+                                             "attachments"           jsonb,
+                                             "created_at"            timestamp(6)             DEFAULT CURRENT_TIMESTAMP,
+                                             "updated_at"            timestamp(6)             DEFAULT CURRENT_TIMESTAMP,
+                                             "deleted_at"            timestamp(6),
+                                             "is_deleted"            bool                     DEFAULT false,
+                                             "related_todo_id"       int8,
+                                             "content"               text,
                                              "amount"                numeric(15, 2),
                                              "cost"                  numeric(15, 2),
-                                             "related_todo_id"       int8,
-                                             "parent_record_id"      int8,
-                                             "next_follow_time"      timestamp(6),
-                                             "next_follow_content"   varchar(500),
-                                             "attachments"           jsonb,
                                              "photos"                jsonb,
                                              "customer_satisfaction" int4,
                                              "customer_feedback"     text,
-                                             "created_at"            timestamp(6)                      DEFAULT CURRENT_TIMESTAMP,
-                                             "updated_at"            timestamp(6)                      DEFAULT CURRENT_TIMESTAMP,
-                                             "deleted_at"            timestamp(6),
-                                             "is_deleted"            bool                              DEFAULT false,
-                                             CONSTRAINT "follow_up_records_customer_satisfaction_check" CHECK (((customer_satisfaction >= 1) AND (customer_satisfaction <= 5))),
-                                             CONSTRAINT "follow_up_records_pkey" PRIMARY KEY (id)
+                                             "next_follow_content"   varchar(500),
+                                             "parent_record_id"      int8,
+                                             CONSTRAINT "follow_up_records_pkey" PRIMARY KEY (id),
+                                             CONSTRAINT "follow_up_records_customer_satisfaction_check" CHECK ((
+                                                 (customer_satisfaction IS NULL) OR
+                                                 ((customer_satisfaction >= 1) AND (customer_satisfaction <= 5))))
 );
 ALTER TABLE "public"."follow_up_records" OWNER TO "postgres";
 CREATE INDEX "idx_follow_up_customer_id" ON "public"."follow_up_records" USING btree (customer_id);
@@ -244,28 +183,41 @@ CREATE TRIGGER "update_follow_up_records_updated_at"
 
 COMMENT ON COLUMN "public"."follow_up_records"."id" IS '记录ID';
 COMMENT ON COLUMN "public"."follow_up_records"."customer_id" IS '客户ID';
-COMMENT ON COLUMN "public"."follow_up_records"."user_id" IS '创建用户ID';
-COMMENT ON COLUMN "public"."follow_up_records"."kind" IS '跟进类型';
+COMMENT
+ON COLUMN "public"."follow_up_records"."user_id" IS '用户ID';
+COMMENT
+ON COLUMN "public"."follow_up_records"."kind" IS '跟进类型：电话、拜访、邮件、微信、会议、其他';
 COMMENT ON COLUMN "public"."follow_up_records"."title" IS '跟进标题';
-COMMENT ON COLUMN "public"."follow_up_records"."content" IS '跟进内容详情';
-COMMENT ON COLUMN "public"."follow_up_records"."data" IS '结构化数据，JSON格式存储不同类型记录的特定字段';
+COMMENT
+ON COLUMN "public"."follow_up_records"."data" IS '沟通数据，格式：{"content": "沟通内容", "result": "沟通结果"}';
 COMMENT ON COLUMN "public"."follow_up_records"."remark" IS '备注';
 COMMENT ON COLUMN "public"."follow_up_records"."duration" IS '持续时长（分钟）';
 COMMENT ON COLUMN "public"."follow_up_records"."location" IS '地点';
-COMMENT ON COLUMN "public"."follow_up_records"."amount" IS '金额（营业额等）';
-COMMENT ON COLUMN "public"."follow_up_records"."cost" IS '成本';
-COMMENT ON COLUMN "public"."follow_up_records"."related_todo_id" IS '关联的待办事项ID';
-COMMENT ON COLUMN "public"."follow_up_records"."parent_record_id" IS '父记录ID（用于记录关联和回复）';
 COMMENT ON COLUMN "public"."follow_up_records"."next_follow_time" IS '下次跟进时间';
-COMMENT ON COLUMN "public"."follow_up_records"."next_follow_content" IS '下次跟进内容';
 COMMENT ON COLUMN "public"."follow_up_records"."attachments" IS '附件信息（JSONB格式）';
-COMMENT ON COLUMN "public"."follow_up_records"."photos" IS '照片信息（JSONB格式）';
-COMMENT ON COLUMN "public"."follow_up_records"."customer_satisfaction" IS '客户满意度（1-5分）';
-COMMENT ON COLUMN "public"."follow_up_records"."customer_feedback" IS '客户反馈';
 COMMENT ON COLUMN "public"."follow_up_records"."created_at" IS '创建时间';
 COMMENT ON COLUMN "public"."follow_up_records"."updated_at" IS '更新时间';
 COMMENT ON COLUMN "public"."follow_up_records"."deleted_at" IS '删除时间（软删除）';
-COMMENT ON COLUMN "public"."follow_up_records"."is_deleted" IS '是否删除';
+COMMENT
+ON COLUMN "public"."follow_up_records"."is_deleted" IS '是否删除：false-否，true-是';
+COMMENT
+ON COLUMN "public"."follow_up_records"."related_todo_id" IS '关联的待办事项ID';
+COMMENT
+ON COLUMN "public"."follow_up_records"."content" IS '跟进内容详情';
+COMMENT
+ON COLUMN "public"."follow_up_records"."amount" IS '金额（营业额等）';
+COMMENT
+ON COLUMN "public"."follow_up_records"."cost" IS '成本';
+COMMENT
+ON COLUMN "public"."follow_up_records"."photos" IS '照片信息（JSONB格式）';
+COMMENT
+ON COLUMN "public"."follow_up_records"."customer_satisfaction" IS '客户满意度（1-5分）';
+COMMENT
+ON COLUMN "public"."follow_up_records"."customer_feedback" IS '客户反馈';
+COMMENT
+ON COLUMN "public"."follow_up_records"."next_follow_content" IS '下次跟进内容';
+COMMENT
+ON COLUMN "public"."follow_up_records"."parent_record_id" IS '父记录ID（用于记录关联和回复）';
 COMMENT ON TABLE "public"."follow_up_records" IS '跟进记录表（扩展版）';
 
 CREATE TABLE "public"."groups"(
@@ -293,6 +245,103 @@ COMMENT ON COLUMN "public"."groups"."deleted_at" IS '删除时间（软删除）
 COMMENT ON COLUMN "public"."groups"."is_deleted" IS '是否删除：false-否，true-是';
 COMMENT ON TABLE "public"."groups" IS '客户组表';
 
+CREATE TABLE "public"."reminder_configs"
+(
+    "id"                        int8 NOT NULL DEFAULT nextval('reminder_configs_id_seq'::regclass),
+    "user_id"                   int8 NOT NULL,
+    "enable_wechat"             bool          DEFAULT true,
+    "enable_enterprise_wechat"  bool          DEFAULT true,
+    "wechat_user_id"            varchar(100),
+    "enterprise_wechat_user_id" varchar(100),
+    "default_advance_minutes"   int4          DEFAULT 30,
+    "quiet_start_time"          varchar(5)    DEFAULT '22:00'::character varying,
+    "quiet_end_time"            varchar(5)    DEFAULT '08:00'::character varying,
+    "created_at"                timestamp(6)  DEFAULT CURRENT_TIMESTAMP,
+    "updated_at"                timestamp(6)  DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "reminder_configs_pkey" PRIMARY KEY (id),
+    CONSTRAINT "reminder_configs_user_id_key" UNIQUE (user_id)
+);
+ALTER TABLE "public"."reminder_configs" OWNER TO "postgres";
+CREATE INDEX "idx_reminder_configs_user_id" ON "public"."reminder_configs" USING btree (user_id);
+COMMENT
+ON TABLE "public"."reminder_configs" IS '用户提醒配置表';
+
+CREATE TABLE "public"."reminder_templates"
+(
+    "id"         int8                     NOT NULL DEFAULT nextval('reminder_templates_id_seq'::regclass),
+    "name"       varchar(100)             NOT NULL,
+    "type"       "public"."reminder_type" NOT NULL,
+    "title"      varchar(255)             NOT NULL,
+    "content"    text                     NOT NULL,
+    "variables"  jsonb,
+    "is_active"  bool                              DEFAULT true,
+    "is_default" bool                              DEFAULT false,
+    "created_by" int8                     NOT NULL,
+    "created_at" timestamp(6)                      DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamp(6)                      DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "reminder_templates_pkey" PRIMARY KEY (id)
+);
+ALTER TABLE "public"."reminder_templates" OWNER TO "postgres";
+CREATE INDEX "idx_reminder_templates_type" ON "public"."reminder_templates" USING btree (type);
+CREATE INDEX "idx_reminder_templates_is_active" ON "public"."reminder_templates" USING btree (is_active);
+CREATE INDEX "idx_reminder_templates_is_default" ON "public"."reminder_templates" USING btree (is_default);
+COMMENT
+ON TABLE "public"."reminder_templates" IS '提醒模板表';
+
+CREATE TABLE "public"."reminders"
+(
+    "id"            int8                     NOT NULL DEFAULT nextval('reminders_id_seq'::regclass),
+    "todo_id"       int8                     NOT NULL,
+    "user_id"       int8                     NOT NULL,
+    "type"          "public"."reminder_type" NOT NULL,
+    "title"         varchar(255)             NOT NULL,
+    "content"       text,
+    "status"        "public"."reminder_status"        DEFAULT 'pending'::reminder_status,
+    "frequency"     "public"."reminder_frequency"     DEFAULT 'once'::reminder_frequency,
+    "schedule_time" timestamp(6)             NOT NULL,
+    "sent_time"     timestamp(6),
+    "fail_reason"   varchar(500),
+    "retry_count"   int4                              DEFAULT 0,
+    "max_retries"   int4                              DEFAULT 3,
+    "created_at"    timestamp(6)                      DEFAULT CURRENT_TIMESTAMP,
+    "updated_at"    timestamp(6)                      DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "reminders_pkey" PRIMARY KEY (id)
+);
+ALTER TABLE "public"."reminders" OWNER TO "postgres";
+CREATE INDEX "idx_reminders_status" ON "public"."reminders" USING btree (status);
+CREATE INDEX "idx_reminders_schedule_time" ON "public"."reminders" USING btree (schedule_time);
+CREATE INDEX "idx_reminders_created_at" ON "public"."reminders" USING btree (created_at);
+CREATE INDEX "idx_reminders_todo_id" ON "public"."reminders" USING btree (todo_id);
+CREATE INDEX "idx_reminders_user_id" ON "public"."reminders" USING btree (user_id);
+COMMENT
+ON COLUMN "public"."reminders"."id" IS '提醒ID';
+COMMENT
+ON COLUMN "public"."reminders"."todo_id" IS '关联待办ID';
+COMMENT
+ON COLUMN "public"."reminders"."user_id" IS '提醒用户ID';
+COMMENT
+ON COLUMN "public"."reminders"."type" IS '提醒方式';
+COMMENT
+ON COLUMN "public"."reminders"."title" IS '提醒标题';
+COMMENT
+ON COLUMN "public"."reminders"."content" IS '提醒内容';
+COMMENT
+ON COLUMN "public"."reminders"."status" IS '提醒状态';
+COMMENT
+ON COLUMN "public"."reminders"."frequency" IS '提醒频率';
+COMMENT
+ON COLUMN "public"."reminders"."schedule_time" IS '计划提醒时间';
+COMMENT
+ON COLUMN "public"."reminders"."sent_time" IS '实际发送时间';
+COMMENT
+ON COLUMN "public"."reminders"."fail_reason" IS '失败原因';
+COMMENT
+ON COLUMN "public"."reminders"."retry_count" IS '重试次数';
+COMMENT
+ON COLUMN "public"."reminders"."max_retries" IS '最大重试次数';
+COMMENT
+ON TABLE "public"."reminders" IS '提醒记录表';
+
 CREATE TABLE "public"."tag_dimensions"(
                                           "id"          int8         NOT NULL DEFAULT nextval('tag_dimensions_id_seq'::regclass),
                                           "name"        varchar(128) NOT NULL,
@@ -302,8 +351,8 @@ CREATE TABLE "public"."tag_dimensions"(
                                           "updated_at"  timestamp(6)          DEFAULT CURRENT_TIMESTAMP,
                                           "deleted_at"  timestamp(6),
                                           "is_deleted"  bool                  DEFAULT false,
-                                          CONSTRAINT "tag_dimensions_name_key" UNIQUE (name),
-                                          CONSTRAINT "tag_dimensions_pkey" PRIMARY KEY (id)
+                                          CONSTRAINT "tag_dimensions_pkey" PRIMARY KEY (id),
+                                          CONSTRAINT "tag_dimensions_name_key" UNIQUE (name)
 );
 ALTER TABLE "public"."tag_dimensions" OWNER TO "postgres";
 CREATE INDEX "idx_tag_dimensions_name" ON "public"."tag_dimensions" USING btree (name);
@@ -330,8 +379,8 @@ CREATE TABLE "public"."tags"(
                                 "updated_at"   timestamp(6)          DEFAULT CURRENT_TIMESTAMP,
                                 "deleted_at"   timestamp(6),
                                 "is_deleted"   bool                  DEFAULT false,
-                                CONSTRAINT "tags_dimension_id_fkey" FOREIGN KEY (dimension_id) REFERENCES tag_dimensions (id),
-                                CONSTRAINT "tags_pkey" PRIMARY KEY (id)
+                                CONSTRAINT "tags_pkey" PRIMARY KEY (id),
+                                CONSTRAINT "tags_dimension_id_fkey" FOREIGN KEY (dimension_id) REFERENCES tag_dimensions (id)
 );
 ALTER TABLE "public"."tags" OWNER TO "postgres";
 CREATE INDEX "idx_tags_dimension_id" ON "public"."tags" USING btree (dimension_id);

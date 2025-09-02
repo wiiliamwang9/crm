@@ -73,6 +73,44 @@ func SetupRoutes(r *gin.Engine) {
 			c.JSON(200, gin.H{"data": customers})
 		})
 
+		// 客户偏好管理路由
+		api.GET("/customers/:id/preferences", func(c *gin.Context) {
+			customerID, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+			preferences := getCustomerPreferences(customerID)
+			c.JSON(200, gin.H{"data": preferences})
+		})
+
+		api.POST("/customers/:id/preferences", func(c *gin.Context) {
+			customerID, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+			var req CustomerPreferenceCreateRequest
+			if err := c.ShouldBindJSON(&req); err != nil {
+				c.JSON(400, gin.H{"error": err.Error()})
+				return
+			}
+			req.CustomerID = customerID
+			preference := createCustomerPreference(req)
+			c.JSON(200, gin.H{"data": preference})
+		})
+
+		api.PUT("/customers/:id/preferences/:preference_id", func(c *gin.Context) {
+			customerID, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+			preferenceID := c.Param("preference_id")
+			var req CustomerPreferenceUpdateRequest
+			if err := c.ShouldBindJSON(&req); err != nil {
+				c.JSON(400, gin.H{"error": err.Error()})
+				return
+			}
+			preference := updateCustomerPreference(customerID, preferenceID, req)
+			c.JSON(200, gin.H{"data": preference})
+		})
+
+		api.DELETE("/customers/:id/preferences/:preference_id", func(c *gin.Context) {
+			customerID, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+			preferenceID := c.Param("preference_id")
+			deleteCustomerPreference(customerID, preferenceID)
+			c.JSON(200, gin.H{"message": "偏好删除成功"})
+		})
+
 		// 待办事项路由
 		api.GET("/todos", func(c *gin.Context) {
 			customerID, _ := strconv.ParseUint(c.Query("customer_id"), 10, 64)
@@ -98,19 +136,40 @@ func SetupRoutes(r *gin.Engine) {
 		})
 
 		// 跟进记录路由
-		api.GET("/activities", func(c *gin.Context) {
+		// 注意：以下接口操作的是 follow_up_records 表，该表是从原 activities 表迁移而来
+		api.GET("/follow-up-records", func(c *gin.Context) {
 			customerID, _ := strconv.ParseUint(c.Query("customer_id"), 10, 64)
 			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 			pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-			activities, total := getActivities(customerID, page, pageSize)
-			c.JSON(200, gin.H{"data": activities, "total": total})
+			records, total := getFollowUpRecords(customerID, page, pageSize)
+			c.JSON(200, gin.H{"data": records, "total": total})
 		})
 
-		api.POST("/activities", func(c *gin.Context) {
-			var req ActivityCreateRequest
+		api.POST("/follow-up-records", func(c *gin.Context) {
+			var req FollowUpRecordCreateRequest
 			c.ShouldBindJSON(&req)
-			activity := createActivity(req)
-			c.JSON(200, gin.H{"data": activity})
+			record := createFollowUpRecord(req)
+			c.JSON(200, gin.H{"data": record})
+		})
+
+		api.GET("/follow-up-records/:id", func(c *gin.Context) {
+			id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+			record := getFollowUpRecord(id)
+			c.JSON(200, gin.H{"data": record})
+		})
+
+		api.PUT("/follow-up-records/:id", func(c *gin.Context) {
+			id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+			var req FollowUpRecordUpdateRequest
+			c.ShouldBindJSON(&req)
+			record := updateFollowUpRecord(id, req)
+			c.JSON(200, gin.H{"data": record})
+		})
+
+		api.DELETE("/follow-up-records/:id", func(c *gin.Context) {
+			id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+			deleteFollowUpRecord(id)
+			c.JSON(200, gin.H{"message": "删除成功"})
 		})
 
 		// 用户路由

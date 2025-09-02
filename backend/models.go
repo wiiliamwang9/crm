@@ -97,23 +97,6 @@ const (
 	PriorityUrgent Priority = "urgent"
 )
 
-// ActivityKind 跟进记录类型枚举
-type ActivityKind string
-
-const (
-	ActivityKindCall      ActivityKind = "call"
-	ActivityKindVisit     ActivityKind = "visit"
-	ActivityKindEmail     ActivityKind = "email"
-	ActivityKindWechat    ActivityKind = "wechat"
-	ActivityKindMeeting   ActivityKind = "meeting"
-	ActivityKindOrder     ActivityKind = "order"
-	ActivityKindSample    ActivityKind = "sample"
-	ActivityKindFeedback  ActivityKind = "feedback"
-	ActivityKindComplaint ActivityKind = "complaint"
-	ActivityKindPayment   ActivityKind = "payment"
-	ActivityKindOther     ActivityKind = "other"
-)
-
 // ActionType 操作类型枚举
 type ActionType string
 
@@ -213,7 +196,10 @@ type Customer struct {
 
 	SystemTags pq.Int64Array `json:"system_tags" gorm:"type:int4[]"`
 
-	LastOrderDate *time.Time `json:"last_order_date" gorm:"comment:最后下单时间"`
+	LastOrderDate           *time.Time `json:"last_order_date" gorm:"comment:最后下单时间"`
+	OrderCount              int        `json:"order_count" gorm:"default:0;comment:订单数量"`
+	AvgOrderValue           *float64   `json:"avg_order_value" gorm:"type:decimal(15,2);comment:平均订单金额"`
+	PreferredDeliveryMethod string     `json:"preferred_delivery_method" gorm:"type:varchar(128);comment:偏好配送方式"` // 修正字段长度以匹配数据库
 }
 
 func (Customer) TableName() string {
@@ -224,6 +210,7 @@ func (Customer) TableName() string {
 type User struct {
 	ID                 uint64     `json:"id" gorm:"primaryKey;autoIncrement;comment:用户ID"`
 	Name               string     `json:"name" gorm:"type:varchar(256);not null;comment:用户名"`
+	Username           string     `json:"username" gorm:"type:text;comment:用户名（登录用）"`
 	ManagerID          *uint64    `json:"manager_id" gorm:"comment:主管ID"`
 	Email              string     `json:"email" gorm:"type:varchar(256);comment:邮箱"`
 	Phone              string     `json:"phone" gorm:"type:varchar(32);comment:手机号"`
@@ -309,50 +296,6 @@ type TodoLog struct {
 
 func (TodoLog) TableName() string {
 	return "todo_logs"
-}
-
-// Activity 跟进记录模型
-type Activity struct {
-	ID                  uint64       `json:"id" gorm:"primaryKey;autoIncrement;comment:记录ID"`
-	CustomerID          uint64       `json:"customer_id" gorm:"not null;index;comment:客户ID"`
-	UserID              uint64       `json:"user_id" gorm:"not null;index;comment:创建用户ID"`
-	Kind                ActivityKind `json:"kind" gorm:"type:varchar(32);default:other;index;comment:跟进记录类型"`
-	Title               string       `json:"title" gorm:"type:varchar(255);comment:跟进标题"`
-	Data                JSONB        `json:"data" gorm:"type:jsonb;comment:结构化数据"`
-	Remark              string       `json:"remark" gorm:"type:text;comment:备注"`
-	Duration            *int         `json:"duration" gorm:"comment:持续时长（分钟）"`
-	Location            string       `json:"location" gorm:"type:varchar(255);comment:地点"`
-	NextFollowTime      *time.Time   `json:"next_follow_time" gorm:"index;comment:下次跟进时间"`
-	Attachments         JSONB        `json:"attachments" gorm:"type:jsonb;comment:附件信息"`
-	TodoID              *uint64      `json:"todo_id" gorm:"column:todo_id;index;comment:关联的待办ID"`
-	IsRegular           bool         `json:"is_regular" gorm:"default:false;index;comment:是否定期跟进"`
-	RegularIntervalDays *int         `json:"regular_interval_days" gorm:"comment:定期间隔天数"`
-	IsCompleted         bool         `json:"is_completed" gorm:"default:false;index;comment:是否完成"`
-	CompletedAt         *time.Time   `json:"completed_at" gorm:"comment:完成时间"`
-	BaseModel
-
-	Customer Customer `json:"customer" gorm:"foreignKey:CustomerID"`
-	User     User     `json:"user" gorm:"foreignKey:UserID"`
-}
-
-func (Activity) TableName() string {
-	return "activities"
-}
-
-// GetTimeAgo 获取时间显示
-func (a *Activity) GetTimeAgo() string {
-	now := time.Now()
-	duration := now.Sub(a.CreatedAt)
-
-	if duration < time.Minute {
-		return "刚刚"
-	} else if duration < time.Hour {
-		return fmt.Sprintf("%d分钟前", int(duration.Minutes()))
-	} else if duration < 24*time.Hour {
-		return fmt.Sprintf("%d小时前", int(duration.Hours()))
-	} else {
-		return fmt.Sprintf("%d天前", int(duration.Hours()/24))
-	}
 }
 
 // Reminder 提醒记录模型
@@ -451,4 +394,71 @@ type Tag struct {
 
 func (Tag) TableName() string {
 	return "tags"
+}
+
+// FollowUpRecord 跟进记录模型
+// 注意：该模型对应的 follow_up_records 表是从原 activities 表迁移而来
+type FollowUpRecord struct {
+	ID                   uint64     `json:"id" gorm:"primaryKey;autoIncrement;comment:跟进记录ID"`
+	CustomerID           uint64     `json:"customer_id" gorm:"not null;index;comment:客户ID"`
+	UserID               uint64     `json:"user_id" gorm:"not null;index;comment:创建用户ID"`
+	Kind                 string     `json:"kind" gorm:"type:varchar(32);default:other;index;comment:跟进记录类型"`
+	Title                string     `json:"title" gorm:"type:varchar(255);comment:跟进标题"`
+	Content              string     `json:"content" gorm:"type:text;comment:跟进内容"`
+	Data                 JSONB      `json:"data" gorm:"type:jsonb;comment:结构化数据"`
+	Remark               string     `json:"remark" gorm:"type:text;comment:备注"`
+	Duration             *int       `json:"duration" gorm:"comment:持续时长（分钟）"`
+	Location             string     `json:"location" gorm:"type:varchar(255);comment:地点"`
+	Amount               *float64   `json:"amount" gorm:"type:decimal(15,2);comment:金额"`
+	Cost                 *float64   `json:"cost" gorm:"type:decimal(15,2);comment:成本"`
+	RelatedTodoID        *uint64    `json:"related_todo_id" gorm:"index;comment:关联的待办ID"`
+	ParentRecordID       *uint64    `json:"parent_record_id" gorm:"index;comment:父记录ID"`
+	NextFollowTime       *time.Time `json:"next_follow_time" gorm:"index;comment:下次跟进时间"`
+	NextFollowContent    string     `json:"next_follow_content" gorm:"type:text;comment:下次跟进内容"`
+	Attachments          JSONB      `json:"attachments" gorm:"type:jsonb;comment:附件信息"`
+	Photos               JSONB      `json:"photos" gorm:"type:jsonb;comment:照片信息"`
+	CustomerSatisfaction *int       `json:"customer_satisfaction" gorm:"comment:客户满意度(1-5)"`
+	CustomerFeedback     string     `json:"customer_feedback" gorm:"type:text;comment:客户反馈"`
+	BaseModel
+
+	Customer     Customer        `json:"customer" gorm:"foreignKey:CustomerID"`
+	User         User            `json:"user" gorm:"foreignKey:UserID"`
+	RelatedTodo  *Todo           `json:"related_todo,omitempty" gorm:"foreignKey:RelatedTodoID"`
+	ParentRecord *FollowUpRecord `json:"parent_record,omitempty" gorm:"foreignKey:ParentRecordID"`
+}
+
+func (FollowUpRecord) TableName() string {
+	return "follow_up_records"
+}
+
+// GetTimeAgo 获取时间差描述
+func (f *FollowUpRecord) GetTimeAgo() string {
+	now := time.Now()
+	diff := now.Sub(f.CreatedAt)
+
+	if diff < time.Minute {
+		return "刚刚"
+	} else if diff < time.Hour {
+		return fmt.Sprintf("%d分钟前", int(diff.Minutes()))
+	} else if diff < 24*time.Hour {
+		return fmt.Sprintf("%d小时前", int(diff.Hours()))
+	} else {
+		return fmt.Sprintf("%d天前", int(diff.Hours()/24))
+	}
+}
+
+// Group 分组模型
+type Group struct {
+	ID          uint64 `json:"id" gorm:"primaryKey;autoIncrement;comment:分组ID"`
+	Name        string `json:"name" gorm:"type:varchar(128);not null;comment:分组名称"`
+	Description string `json:"description" gorm:"type:text;comment:分组描述"`
+	CreatedBy   uint64 `json:"created_by" gorm:"not null;index;comment:创建人ID"`
+	SortOrder   int    `json:"sort_order" gorm:"default:0;index;comment:排序顺序"`
+	BaseModel
+
+	Creator User `json:"creator" gorm:"foreignKey:CreatedBy"`
+}
+
+func (Group) TableName() string {
+	return "groups"
 }

@@ -54,46 +54,18 @@
 
 ```
 crm/
-├── backend/                    # Go后端服务
-│   ├── main.go                # 应用入口文件
+├── backend/                    # Go后端服务（精简化单文件架构）
+│   ├── main.go                # 应用启动入口
+│   ├── config.go              # 配置管理（数据库连接、服务器配置）
+│   ├── config.yml             # YAML配置文件
+│   ├── models.go              # 数据模型定义（所有实体模型）
+│   ├── dto.go                 # 数据传输对象（请求/响应结构体）
+│   ├── crm.go                 # 核心业务逻辑（所有业务函数）
+│   ├── routes.go              # 路由配置（所有API路由定义）
+│   ├── util.go                # 工具函数（字符串处理、类型转换等）
 │   ├── go.mod                 # Go模块配置
-│   ├── start.sh               # 启动脚本
-│   ├── config/                # 配置模块
-│   │   ├── database.go        # 数据库连接配置
-│   │   └── server.go          # 服务器配置
-│   ├── models/                # 数据模型层
-│   │   ├── customer.go        # 客户数据模型
-│   │   ├── todo.go            # 待办事项模型
-│   │   ├── reminder.go        # 提醒系统模型
-│   │   ├── user.go            # 用户模型
-│   │   └── group.go           # 客户组模型
-│   ├── handlers/              # HTTP处理器层
-│   │   ├── customer_crud.go   # 客户CRUD操作
-│   │   ├── customer_query.go  # 客户查询操作
-│   │   ├── excel_handler.go   # Excel导入处理
-│   │   ├── todo.go            # 待办事项处理
-│   │   ├── reminder_handler.go # 提醒处理
-│   │   └── user_handler.go    # 用户管理
-│   ├── services/              # 业务逻辑层
-│   │   ├── customer_service.go
-│   │   ├── todo_service.go
-│   │   ├── reminder_service.go
-│   │   └── user_service.go
-│   ├── routes/                # 路由配置
-│   │   ├── routes.go          # 主路由
-│   │   ├── customer_routes.go # 客户相关路由
-│   │   ├── todo_routes.go     # 待办相关路由
-│   │   ├── reminder_routes.go # 提醒相关路由
-│   │   └── user_routes.go     # 用户相关路由
-│   ├── middleware/            # 中间件
-│   │   └── response.go        # 统一响应处理
-│   ├── dto/                   # 数据传输对象
-│   │   └── customer_dto.go
-│   ├── migrations/            # 数据库迁移脚本
-│   └── sql/                   # SQL脚本
-│       ├── core_tables.sql
-│       ├── todo.sql
-│       └── reminder.sql
+│   ├── go.sum                 # 依赖版本锁定
+│   └── init.sql               # 数据库初始化脚本
 ├── web/                       # 前端应用
 │   ├── index.html            # 主页面
 │   ├── index-new.html        # 新版本页面
@@ -130,10 +102,11 @@ go mod tidy
 ```
 
 ### 2. 配置数据库
-数据库连接信息已配置为：
+
+数据库连接信息在config.yml中配置：
 - Host: db.lamdar.cn
 - Port: 9524
-- Database: walkman
+- Database: crm
 - Username: postgres
 - Password: tpg1688
 
@@ -143,45 +116,114 @@ cd backend
 go run main.go
 ```
 
-服务将在 `http://localhost:8080` 启动
+服务将在 `http://localhost:8081` 启动（可在config.yml中配置端口）
 
 ### 4. 访问前端
-打开浏览器访问 `http://localhost:8080` 即可使用系统
+
+打开浏览器访问 `http://localhost:8081` 即可使用系统
 
 ## API接口文档
 
 ### 客户管理 API
-- `GET /api/v1/customers` - 获取客户列表（支持分页、搜索、筛选）
+
+- `GET /api/v1/customers` - 获取客户列表（支持分页、搜索）
 - `GET /api/v1/customers/:id` - 获取单个客户详细信息
 - `POST /api/v1/customers` - 创建新客户
 - `PUT /api/v1/customers/:id` - 更新客户信息
 - `DELETE /api/v1/customers/:id` - 删除客户
-- `GET /api/v1/customers/query` - 高级客户查询
-- `POST /api/v1/upload-excel` - Excel批量导入客户数据
+- `GET /api/v1/customers/search` - 客户搜索（支持关键词和系统标签）
 
 ### 待办事项 API
-- `GET /api/v1/todos` - 获取待办事项列表
-- `GET /api/v1/todos/:id` - 获取待办详情
+
+- `GET /api/v1/todos` - 获取待办事项列表（支持客户筛选和分页）
 - `POST /api/v1/todos` - 创建待办事项
 - `PUT /api/v1/todos/:id` - 更新待办事项
-- `DELETE /api/v1/todos/:id` - 删除待办事项
-- `POST /api/v1/todos/:id/complete` - 完成待办事项
-- `GET /api/v1/todos/logs/:id` - 获取待办操作日志
+
+### 跟进记录 API
+
+- `GET /api/v1/activities` - 获取跟进记录列表（支持客户筛选和分页）
+- `POST /api/v1/activities` - 创建跟进记录
+
+### 用户管理 API
+
+- `GET /api/v1/users` - 获取用户列表
+- `GET /api/v1/users/:id` - 获取用户详情（智能判断员工/客户身份）
+
+### 仪表板 API
+
+- `POST /api/v1/dashboard/search` - 仪表板搜索（支持多维度筛选）
+
+### 标签管理 API
+
+- `GET /api/v1/tags` - 获取标签列表
+- `POST /api/v1/tags` - 创建标签
 
 ### 提醒系统 API
 - `GET /api/v1/reminders` - 获取提醒列表
-- `GET /api/v1/reminders/:id` - 获取提醒详情
 - `POST /api/v1/reminders` - 创建提醒
-- `PUT /api/v1/reminders/:id` - 更新提醒
-- `DELETE /api/v1/reminders/:id` - 删除提醒
-- `GET /api/v1/reminder-templates` - 获取提醒模板
-- `GET /api/v1/reminder-config` - 获取用户提醒配置
 
-### 用户管理 API
-- `GET /api/v1/users` - 获取用户列表
-- `GET /api/v1/users/:id` - 获取用户详情
-- `POST /api/v1/users` - 创建用户
-- `PUT /api/v1/users/:id` - 更新用户信息
+### 系统 API
+
+- `GET /health` - 健康检查
+
+## 后端架构详解
+
+### 精简化单文件架构
+
+项目采用精简的单文件架构设计，将原来的多层分布式代码重构为功能明确的单文件模块：
+
+#### 文件职责划分
+
+1. **main.go** - 应用启动流程
+    - 配置文件加载
+    - 数据库连接初始化
+    - GORM自动迁移
+    - Gin路由设置和服务启动
+
+2. **config.go** - 配置管理
+    - YAML配置文件解析
+    - 数据库连接配置
+    - 服务器运行模式设置
+    - 全局配置变量管理
+
+3. **models.go** - 数据模型层
+    - 所有实体模型定义（Customer、Todo、User、Activity等）
+    - 自定义JSONB类型实现
+    - 枚举类型定义
+    - 模型方法（IsOverdue、GetTimeAgo等）
+
+4. **dto.go** - 数据传输层
+    - 请求/响应结构体定义
+    - 模型转换函数（ToModel/FromModel）
+    - 数据验证规则
+    - 类型转换辅助函数
+
+5. **crm.go** - 业务逻辑层
+    - 所有业务函数实现
+    - 客户管理：增删改查、搜索、数据聚合
+    - 待办管理：创建、更新、状态追踪
+    - 跟进记录：活动记录、时间计算
+    - 用户管理：角色识别、详情查询
+    - 仪表板：多维度数据筛选和聚合
+
+6. **routes.go** - 路由配置
+    - 统一的路由注册
+    - CORS中间件配置
+    - API端点定义和参数绑定
+    - 响应格式标准化
+
+7. **util.go** - 工具函数
+    - 字符串处理（分割、去空格、连接）
+    - 类型转换（字符串转int64、数组解析）
+    - JSON序列化/反序列化封装
+
+### 架构优势
+
+- **简化维护**：代码集中在少数文件中，便于理解和修改
+- **快速部署**：编译后仅需单个可执行文件和配置文件
+- **清晰职责**：每个文件功能明确，避免代码重复
+- **配置外化**：通过YAML文件管理环境配置
+- **自动迁移**：启动时自动同步数据库结构
 
 ## Excel导入格式
 
@@ -405,7 +447,7 @@ manager_id int4         主管ID
 
 ### 跟进记录表(activities)
 ```
-id          int4      活动ID
+id          int4      跟进记录ID
 customer_id int4      客户ID
 user_id     int4      用户ID
 kind        int4      类型
@@ -414,22 +456,37 @@ created_at  timestamp 创建时间
 remark      text      备注
 ```
 
-## 技术亮点
+## 技术特点
 
-- **模块化架构**：清晰的分层架构，便于维护和扩展
-- **数据一致性**：完善的事务管理和数据校验
-- **高性能查询**：优化的数据库索引和查询语句
-- **安全可靠**：参数验证、SQL注入防护
-- **日志审计**：完整的操作日志记录
-- **响应式设计**：适配多种设备尺寸
+### 后端架构优势
+
+- **精简架构**：采用单文件架构模式，降低维护复杂度
+- **配置驱动**：YAML配置文件统一管理数据库和服务器配置
+- **GORM自动迁移**：启动时自动创建和更新数据库表结构
+- **统一响应格式**：标准化的JSON响应结构
+- **类型安全**：完整的枚举定义和数据验证
+
+### 业务逻辑优势
+
+- **智能搜索**：支持多维度客户搜索和仪表板数据筛选
+- **关联查询**：GORM预加载优化复杂关联查询性能
+- **数据聚合**：智能的客户待办聚合和时间维度分析
+- **用户角色识别**：动态判断用户身份（员工/客户）
+
+### 数据模型特点
+
+- **JSONB支持**：灵活的非结构化数据存储
+- **PostgreSQL数组**：高效的多值字段支持
+- **软删除机制**：BaseModel提供统一的删除标记
+- **时间维度**：完整的创建、更新、删除时间追踪
 
 ## 开发规范
 
-- 遵循RESTful API设计原则
-- 统一的错误处理和响应格式
-- 代码注释完整，便于维护
-- 数据库设计规范，字段含义明确
-- 前后端分离，便于独立开发和部署
+- **单一职责**：每个文件承担明确的功能职责
+- **RESTful设计**：标准化的API端点设计
+- **配置化管理**：外部化配置，便于环境切换
+- **类型驱动**：强类型定义，减少运行时错误
+- **响应统一**：标准化的JSON响应格式
 
 ## 贡献指南
 

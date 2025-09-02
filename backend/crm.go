@@ -193,85 +193,141 @@ func updateTodo(id uint64, req TodoUpdateRequest) *TodoResponse {
 }
 
 // ========== 跟进记录相关业务函数 ==========
+// 注意：以下接口操作的是 follow_up_records 表，该表是从原 activities 表迁移而来
 
-// getActivities 获取跟进记录列表
-func getActivities(customerID uint64, page, pageSize int) ([]ActivityResponse, int64) {
-	var activities []Activity
+// getFollowUpRecords 获取跟进记录列表
+// 数据来源：follow_up_records 表（原 activities 表迁移）
+func getFollowUpRecords(customerID uint64, page, pageSize int) ([]FollowUpRecordResponse, int64) {
+	var records []FollowUpRecord
 	var total int64
 
-	query := DB.Model(&Activity{}).Preload("Customer").Preload("User")
+	query := DB.Model(&FollowUpRecord{}).Preload("Customer").Preload("User")
 	if customerID > 0 {
 		query = query.Where("customer_id = ?", customerID)
 	}
 
 	query.Count(&total)
-	query.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&activities)
+	query.Offset((page - 1) * pageSize).Limit(pageSize).Order("created_at DESC").Find(&records)
 
-	responses := make([]ActivityResponse, len(activities))
-	for i, activity := range activities {
-		responses[i] = ActivityResponse{
-			Activity:     activity,
-			UserName:     activity.User.Name,
-			CustomerName: activity.Customer.Name,
-			TimeAgo:      activity.GetTimeAgo(),
-		}
-
-		// 从Data中提取字段
-		if activity.Data != nil {
-			if content, ok := activity.Data["content"].(string); ok {
-				responses[i].Content = content
-			}
-			if result, ok := activity.Data["result"].(string); ok {
-				responses[i].Result = result
-			}
-			if amount, ok := activity.Data["amount"].(float64); ok {
-				responses[i].Amount = amount
-			}
+	responses := make([]FollowUpRecordResponse, len(records))
+	for i, record := range records {
+		responses[i] = FollowUpRecordResponse{
+			FollowUpRecord: record,
+			UserName:       record.User.Name,
+			CustomerName:   record.Customer.Name,
+			TimeAgo:        record.GetTimeAgo(),
 		}
 	}
 
 	return responses, total
 }
 
-// createActivity 创建跟进记录
-func createActivity(req ActivityCreateRequest) *ActivityResponse {
-	activity := &Activity{
-		CustomerID:     req.CustomerID,
-		UserID:         1, // TODO: 从上下文获取当前用户ID
-		Kind:           req.Kind,
-		Title:          req.Title,
-		Remark:         req.Remark,
-		Duration:       req.Duration,
-		Location:       req.Location,
-		NextFollowTime: req.NextFollowTime,
-		Attachments:    req.Attachments,
+// createFollowUpRecord 创建跟进记录
+// 数据来源：follow_up_records 表（原 activities 表迁移）
+func createFollowUpRecord(req FollowUpRecordCreateRequest) *FollowUpRecordResponse {
+	record := &FollowUpRecord{
+		CustomerID:           req.CustomerID,
+		UserID:               req.UserID,
+		Kind:                 req.Type,
+		Title:                req.Title,
+		Content:              req.Content,
+		Amount:               req.Amount,
+		Cost:                 req.Cost,
+		Photos:               req.Photos,
+		CustomerSatisfaction: req.CustomerSatisfaction,
+		CustomerFeedback:     req.CustomerFeedback,
+		NextFollowContent:    req.NextFollowContent,
+		ParentRecordID:       req.ParentRecordID,
 	}
 
-	// 设置Data字段
-	data := make(JSONB)
-	data["content"] = req.Content
-	data["result"] = req.Result
-	data["amount"] = req.Amount
-	data["cost"] = req.Cost
-	data["feedback"] = req.Feedback
-	data["satisfaction"] = req.Satisfaction
-	activity.Data = data
+	DB.Create(record)
+	DB.Preload("Customer").Preload("User").First(record, record.ID)
 
-	DB.Create(activity)
-	DB.Preload("Customer").Preload("User").First(activity, activity.ID)
-
-	return &ActivityResponse{
-		Activity:     *activity,
-		UserName:     activity.User.Name,
-		CustomerName: activity.Customer.Name,
-		Content:      req.Content,
-		Result:       req.Result,
-		Amount:       req.Amount,
-		Cost:         req.Cost,
-		Feedback:     req.Feedback,
-		Satisfaction: req.Satisfaction,
-		TimeAgo:      activity.GetTimeAgo(),
+	return &FollowUpRecordResponse{
+		FollowUpRecord: *record,
+		UserName:       record.User.Name,
+		CustomerName:   record.Customer.Name,
+		TimeAgo:        record.GetTimeAgo(),
 	}
+}
+
+// getFollowUpRecord 获取单个跟进记录
+// 数据来源：follow_up_records 表（原 activities 表迁移）
+func getFollowUpRecord(id uint64) *FollowUpRecordResponse {
+	var record FollowUpRecord
+	DB.Preload("Customer").Preload("User").First(&record, id)
+
+	return &FollowUpRecordResponse{
+		FollowUpRecord: record,
+		UserName:       record.User.Name,
+		CustomerName:   record.Customer.Name,
+		TimeAgo:        record.GetTimeAgo(),
+	}
+}
+
+// updateFollowUpRecord 更新跟进记录
+// 数据来源：follow_up_records 表（原 activities 表迁移）
+func updateFollowUpRecord(id uint64, req FollowUpRecordUpdateRequest) *FollowUpRecordResponse {
+	var record FollowUpRecord
+	DB.Preload("Customer").Preload("User").First(&record, id)
+
+	if req.Title != nil {
+		record.Title = *req.Title
+	}
+	if req.Content != nil {
+		record.Content = *req.Content
+	}
+	if req.Remark != nil {
+		record.Remark = *req.Remark
+	}
+	if req.Duration != nil {
+		record.Duration = req.Duration
+	}
+	if req.Location != nil {
+		record.Location = *req.Location
+	}
+	if req.Amount != nil {
+		record.Amount = req.Amount
+	}
+	if req.Cost != nil {
+		record.Cost = req.Cost
+	}
+	if req.NextFollowTime != nil {
+		record.NextFollowTime = req.NextFollowTime
+	}
+	if req.NextFollowContent != nil {
+		record.NextFollowContent = *req.NextFollowContent
+	}
+	if req.CustomerSatisfaction != nil {
+		record.CustomerSatisfaction = req.CustomerSatisfaction
+	}
+	if req.CustomerFeedback != nil {
+		record.CustomerFeedback = *req.CustomerFeedback
+	}
+	if req.Attachments != nil {
+		record.Attachments = req.Attachments
+	}
+	if req.Photos != nil {
+		record.Photos = req.Photos
+	}
+	if req.Data != nil {
+		record.Data = req.Data
+	}
+
+	DB.Save(&record)
+
+	return &FollowUpRecordResponse{
+		FollowUpRecord: record,
+		UserName:       record.User.Name,
+		CustomerName:   record.Customer.Name,
+		TimeAgo:        record.GetTimeAgo(),
+	}
+}
+
+// deleteFollowUpRecord 删除跟进记录
+// 数据来源：follow_up_records 表（原 activities 表迁移）
+func deleteFollowUpRecord(id uint64) {
+	DB.Delete(&FollowUpRecord{}, id)
 }
 
 // ========== 用户相关业务函数 ==========
@@ -329,18 +385,18 @@ func getUserDetail(id uint64) *UserDetailResponse {
 		}
 	}
 
-	// 计算今日跟进数量（待办+活动记录）
+	// 计算今日跟进数量（待办+跟进记录）
 	today := time.Now().Format("2006-01-02")
 	var todayTodos int64
-	var todayActivities int64
+	var todayFollowUps int64
 
 	DB.Model(&Todo{}).
 		Where("executor_id = ? AND DATE(planned_time) = ? AND status != 'completed'", id, today).
 		Count(&todayTodos)
 
-	DB.Model(&Activity{}).
+	DB.Model(&FollowUpRecord{}).
 		Where("user_id = ? AND DATE(created_at) = ?", id, today).
-		Count(&todayActivities)
+		Count(&todayFollowUps)
 
 	return &UserDetailResponse{
 		ID:           user.ID,
@@ -348,7 +404,7 @@ func getUserDetail(id uint64) *UserDetailResponse {
 		DisplayInfo:  displayInfo,
 		IsEmployee:   isEmployee,
 		TodayRevenue: 0, // 暂时默认为0
-		TodayFollows: int(todayTodos + todayActivities),
+		TodayFollows: int(todayTodos + todayFollowUps),
 		AvatarURL:    user.AvatarURL,
 	}
 }
@@ -614,5 +670,146 @@ func createReminder(req ReminderCreateRequest) *ReminderResponse {
 	return &ReminderResponse{
 		Reminder: *reminder,
 		UserName: reminder.User.Name,
+	}
+}
+
+// ========== 客户偏好相关业务函数 ==========
+
+// getCustomerPreferences 获取客户偏好列表
+func getCustomerPreferences(customerID uint64) *CustomerPreferenceListResponse {
+	var customer Customer
+	DB.First(&customer, customerID)
+
+	// 解析JSONB格式的偏好数据
+	preferences := []CustomerPreferenceItem{}
+	if customer.Favors != nil {
+		for id, favor := range customer.Favors {
+			if favorMap, ok := favor.(map[string]interface{}); ok {
+				item := CustomerPreferenceItem{
+					ID:          id,
+					Category:    getStringFromMap(favorMap, "category"),
+					Name:        getStringFromMap(favorMap, "name"),
+					Value:       favorMap["value"],
+					Description: getStringFromMap(favorMap, "description"),
+					CreatedAt:   getTimeFromMap(favorMap, "created_at"),
+					UpdatedAt:   getTimeFromMap(favorMap, "updated_at"),
+				}
+				preferences = append(preferences, item)
+			}
+		}
+	}
+
+	return &CustomerPreferenceListResponse{
+		CustomerID:   customerID,
+		CustomerName: customer.Name,
+		Preferences:  preferences,
+		Total:        len(preferences),
+	}
+}
+
+// createCustomerPreference 创建客户偏好
+func createCustomerPreference(req CustomerPreferenceCreateRequest) *CustomerPreferenceResponse {
+	var customer Customer
+	DB.First(&customer, req.CustomerID)
+
+	// 初始化favors字段
+	if customer.Favors == nil {
+		customer.Favors = make(JSONB)
+	}
+
+	// 生成唯一ID
+	preferenceID := generatePreferenceID()
+	now := time.Now()
+
+	// 创建偏好项
+	preferenceData := map[string]interface{}{
+		"category":    req.Category,
+		"name":        req.Name,
+		"value":       req.Value,
+		"description": req.Description,
+		"created_at":  now,
+		"updated_at":  now,
+	}
+
+	customer.Favors[preferenceID] = preferenceData
+	customer.UpdatedAt = now
+
+	DB.Save(&customer)
+
+	return &CustomerPreferenceResponse{
+		CustomerPreferenceItem: CustomerPreferenceItem{
+			ID:          preferenceID,
+			Category:    req.Category,
+			Name:        req.Name,
+			Value:       req.Value,
+			Description: req.Description,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		CustomerID:   req.CustomerID,
+		CustomerName: customer.Name,
+	}
+}
+
+// updateCustomerPreference 更新客户偏好
+func updateCustomerPreference(customerID uint64, preferenceID string, req CustomerPreferenceUpdateRequest) *CustomerPreferenceResponse {
+	var customer Customer
+	DB.First(&customer, customerID)
+
+	if customer.Favors == nil || customer.Favors[preferenceID] == nil {
+		return nil
+	}
+
+	preferenceData, ok := customer.Favors[preferenceID].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	now := time.Now()
+
+	// 更新字段
+	if req.Category != nil {
+		preferenceData["category"] = *req.Category
+	}
+	if req.Name != nil {
+		preferenceData["name"] = *req.Name
+	}
+	if req.Value != nil {
+		preferenceData["value"] = req.Value
+	}
+	if req.Description != nil {
+		preferenceData["description"] = *req.Description
+	}
+	preferenceData["updated_at"] = now
+
+	customer.Favors[preferenceID] = preferenceData
+	customer.UpdatedAt = now
+
+	DB.Save(&customer)
+
+	return &CustomerPreferenceResponse{
+		CustomerPreferenceItem: CustomerPreferenceItem{
+			ID:          preferenceID,
+			Category:    getStringFromMap(preferenceData, "category"),
+			Name:        getStringFromMap(preferenceData, "name"),
+			Value:       preferenceData["value"],
+			Description: getStringFromMap(preferenceData, "description"),
+			CreatedAt:   getTimeFromMap(preferenceData, "created_at"),
+			UpdatedAt:   now,
+		},
+		CustomerID:   customerID,
+		CustomerName: customer.Name,
+	}
+}
+
+// deleteCustomerPreference 删除客户偏好
+func deleteCustomerPreference(customerID uint64, preferenceID string) {
+	var customer Customer
+	DB.First(&customer, customerID)
+
+	if customer.Favors != nil {
+		delete(customer.Favors, preferenceID)
+		customer.UpdatedAt = time.Now()
+		DB.Save(&customer)
 	}
 }

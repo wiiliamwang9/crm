@@ -24,7 +24,7 @@ func main() {
 	// 自动迁移数据库表
 	DB.AutoMigrate(&Customer{}, &Todo{}, &TodoLog{},
 		&Reminder{}, &ReminderTemplate{}, &ReminderConfig{},
-		&Activity{}, &User{}, &TagDimension{}, &Tag{})
+		&FollowUpRecord{}, &User{}, &TagDimension{}, &Tag{})
 
 	// 创建Gin引擎
 	r := gin.Default()

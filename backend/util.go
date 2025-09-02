@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 // joinStrings 用指定分隔符连接字符串数组
@@ -105,4 +106,44 @@ func parseInt64(s string) (int64, error) {
 	}
 
 	return result, nil
+}
+
+// generatePreferenceID 生成偏好项唯一ID
+func generatePreferenceID() string {
+	return fmt.Sprintf("pref_%d", getCurrentTimestamp())
+}
+
+// getCurrentTimestamp 获取当前时间戳（毫秒）
+func getCurrentTimestamp() int64 {
+	return getCurrentTime().UnixNano() / 1000000
+}
+
+// getCurrentTime 获取当前时间
+func getCurrentTime() time.Time {
+	return time.Now()
+}
+
+// getStringFromMap 从map中安全获取字符串值
+func getStringFromMap(m map[string]interface{}, key string) string {
+	if value, ok := m[key]; ok {
+		if str, ok := value.(string); ok {
+			return str
+		}
+	}
+	return ""
+}
+
+// getTimeFromMap 从map中安全获取时间值
+func getTimeFromMap(m map[string]interface{}, key string) time.Time {
+	if value, ok := m[key]; ok {
+		if timeStr, ok := value.(string); ok {
+			if t, err := time.Parse(time.RFC3339, timeStr); err == nil {
+				return t
+			}
+		}
+		if t, ok := value.(time.Time); ok {
+			return t
+		}
+	}
+	return time.Time{}
 }

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户列表</title>
+    <link rel="stylesheet" href="css/common.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- 头部搜索区域 -->
+        <header class="search-header">
+            <div class="search-header-content">
+                <button class="back-btn">‹</button>
+                <h1 class="search-title">客户列表</h1>
+                <button class="search-menu-btn">⋯</button>
+            </div>
+        </header>
+
+
+
+         <!-- 底部导航 -->
+        <div class="bottom-navigation">
+            <div class="nav-item">
+                <img class="nav-icon" src="./image/home.svg" />
+                <div class="nav-label-active">首页</div>
+            </div>
+            <div class="nav-item" onclick="window.location.href='../customer/customer.html'" style="cursor: pointer;">
+                <img class="nav-icon" src="./image/customers.svg" width="22" height="22" />
+                <div class="nav-label">客户</div>
+            </div>
+            <div class="nav-item">
+                <img class="nav-icon" src="./image/optional.svg" width="22" height="22" />
+                <div class="nav-label">业绩</div>
+            </div>
+            <div class="nav-item">
+                <img class="nav-icon" src="./image/config.svg" width="22" height="22" />
+                <div class="nav-label">设置</div>
+            </div>
+        </div>
+    </div>
+</body>
