@@ -105,35 +105,10 @@ const app = createApp({
             window.location.href = './customer.html?id=' + id
         }
         
-        // 弹窗相关
-        const showActionMenu = ref(false)
-        const showTodoDialog = ref(false)
-        const showSOSDialog = ref(false)
-        const currentCustomerId = ref(null)
-        
-        // 点击Frame.png显示操作菜单
-        const onMoreClick = (customerId) => {
-            currentCustomerId.value = customerId
-            showActionMenu.value = true
+        // 跳转到搜索页面
+        const goToSearch = () => {
+            window.location.href = './search.html'
         }
-        
-        // 操作菜单选项点击
-        const onAddTodo = () => {
-            showActionMenu.value = false
-            showTodoDialog.value = true
-        }
-        
-        const onSOS = () => {
-            showActionMenu.value = false
-            showSOSDialog.value = true
-        }
-        
-        const onCall = () => {
-            showActionMenu.value = false
-            // 这里可以添加打电话的逻辑
-            alert('拨打电话功能')
-        }
-        
         return {
             todayList,
             getRandomIntInclusive,
@@ -147,14 +122,7 @@ const app = createApp({
             onUpcomingChange,
             userInfo,
             onRead,
-            showActionMenu,
-            showTodoDialog,
-            showSOSDialog,
-            currentCustomerId,
-            onMoreClick,
-            onAddTodo,
-            onSOS,
-            onCall
+            goToSearch
         }
     }
 })
@@ -357,6 +325,10 @@ const app2 = createApp({
         const onRead = (id) => {
             window.location.href = './customer.html?id=' + id
         }
+        //跳转到搜索页面
+        const goToSearch = () => {
+            window.location.href = './search.html'
+        }
         //随机数
         const getRandomIntInclusive = (min, max) => {
             min = Math.ceil(min);
@@ -374,7 +346,8 @@ const app2 = createApp({
             onType1Change,
             onRead,
             show1,
-            form1
+            form1,
+            goToSearch
         }
     }
 })

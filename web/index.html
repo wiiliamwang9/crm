@@ -49,11 +49,11 @@
 
             <!-- 搜索框 -->
             <div class="search-container">
-                <div class="search-box">
+                <div class="search-box" @click="goToSearch">
                     <span class="search-icon">
                         <img alt="" src="./image/search.png">
                     </span>
-                    <input placeholder="搜索客户..." type="text">
+                    <input placeholder="搜索客户..." type="text" @focus="goToSearch" @input="goToSearch">
                 </div>
             </div>
         </header>
@@ -115,7 +115,7 @@
                                 <img alt="" src="./image/Vector.png">
                                 <span>发微信</span>
                             </button>
-                            <div class="more-btn" @click="onMoreClick(item.customer_id)">
+                            <div class="more-btn">
                                 <img alt="" src="./image/Frame.png">
                             </div>
                         </div>
@@ -249,7 +249,7 @@
                                 <img alt="" src="./image/Vector.png">
                                 <span>发微信</span>
                             </button>
-                            <div class="more-btn" @click="onMoreClick(item.customer_id)">
+                            <div class="more-btn">
                                 <img alt="" src="./image/Frame.png">
                             </div>
                         </div>
@@ -381,7 +381,7 @@
                                 <img alt="" src="./image/Vector.png">
                                 <span>发微信</span>
                             </button>
-                            <div class="more-btn" @click="onMoreClick(1)">
+                            <div class="more-btn">
                                 <img alt="" src="./image/Frame.png">
                             </div>
                         </div>
@@ -413,7 +413,7 @@
                                 <img alt="" src="./image/Vector.png">
                                 <span>发微信</span>
                             </button>
-                            <div class="more-btn" @click="onMoreClick(2)">
+                            <div class="more-btn">
                                 <img alt="" src="./image/Frame.png">
                             </div>
                         </div>
@@ -447,7 +447,7 @@
                                 <img alt="" src="./image/Vector.png">
                                 <span>发微信</span>
                             </button>
-                            <div class="more-btn" @click="onMoreClick(3)">
+                            <div class="more-btn">
                                 <img alt="" src="./image/Frame.png">
                             </div>
                         </div>
@@ -475,81 +475,6 @@
                 <div class="nav-label">设置</div>
             </div>
         </div>
-    
-    <!-- 操作菜单弹窗 -->
-    <div v-if="showActionMenu" class="popup-overlay" @click="showActionMenu = false">
-        <div class="action-menu" @click.stop>
-            <div class="action-item" @click="onAddTodo">
-                <img src="./image/record.png" alt="">
-                <span>加待办</span>
-            </div>
-            <div class="action-item" @click="onSOS">
-                <img src="./image/alert-circle.png" alt="">
-                <span>SOS求助</span>
-            </div>
-            <div class="action-item call-item" @click="onCall">
-                 <img src="./image/Vector.png" alt="">
-                 <span>打电话</span>
-             </div>
-        </div>
-    </div>
-    
-    <!-- 加待办弹窗 -->
-    <div v-if="showTodoDialog" class="popup-overlay">
-        <div class="popup-box1">
-            <div class="popup-header">
-                <h3>为客户添加待办</h3>
-                <div class="popup-box1-close" @click="showTodoDialog = false">
-                    <img src="./image/x1.png" alt="">
-                </div>
-            </div>
-            <div class="popup-content">
-                <div class="form-group">
-                    <label>待办内容</label>
-                    <textarea placeholder="请输入待办内容" rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>提醒时间</label>
-                    <input type="datetime-local">
-                </div>
-            </div>
-            <div class="popup-footer">
-                <button class="btn-cancel" @click="showTodoDialog = false">取消</button>
-                <button class="btn-confirm">确定</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- SOS求助弹窗 -->
-    <div v-if="showSOSDialog" class="popup-overlay">
-        <div class="popup-box1">
-            <div class="popup-header">
-                <h3>SOS求助</h3>
-                <div class="popup-box1-close" @click="showSOSDialog = false">
-                    <img src="./image/x1.png" alt="">
-                </div>
-            </div>
-            <div class="popup-content">
-                <div class="form-group">
-                    <label>求助内容</label>
-                    <textarea placeholder="请描述需要帮助的问题" rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>紧急程度</label>
-                    <select>
-                        <option value="high">高</option>
-                        <option value="medium">中</option>
-                        <option value="low">低</option>
-                    </select>
-                </div>
-            </div>
-            <div class="popup-footer">
-                <button class="btn-cancel" @click="showSOSDialog = false">取消</button>
-                <button class="btn-confirm">发送求助</button>
-            </div>
-        </div>
-    </div>
-    
     </div>
 </body>
 <script src="./js/comm.js"></script>

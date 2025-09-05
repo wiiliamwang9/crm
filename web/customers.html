@@ -21,11 +21,11 @@
             <div :class="'customer-tab ' + (type1Index == 2 ? 'active':'')" @click="onType1Change(2)">近期待跟进</div>
         </div>
         <!-- 搜索 -->
-        <div class="customer-search">
+        <div class="customer-search" @click="goToSearch">
             <div class="customer-search-icon">
                 <img alt="" src="./image/search.png">
             </div>
-            <input placeholder="搜索客户..."/>
+            <input placeholder="搜索客户..." @focus="goToSearch" @input="goToSearch"/>
             <div class="customer-search-icon">
                 <img alt="" src="./image/x-circle.png">
             </div>
