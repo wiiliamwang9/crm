@@ -1,85 +1,131 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>搜索客户</title>
-    <link rel="stylesheet" href="css/common.css">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>客户搜索页面</title>
+    <link href="./common.css" rel="stylesheet">
+
 </head>
+
 <body>
-    <div class="container">
-        <!-- 头部搜索区域 -->
-        <header class="search-header">
-            <div class="search-header-content">
-                <button class="back-btn">‹</button>
-                <button class="close-btn">×</button>
-                <h1 class="search-title">搜索</h1>
-                <button class="search-menu-btn">⋯</button>
-            </div>
-            
-            <div class="search-section">
-                <div class="search-input-wrapper">
-                    <input type="text" class="search-input" placeholder="搜索客户、组织等">
-                    <button class="cancel-btn">取消</button>
-                </div>
-            </div>
-        </header>
+<div class="container" id="search">
 
-        <!-- 主要内容区域 -->
-        <main class="search-main-content">
-            <!-- 搜索历史 -->
-            <section class="search-history">
-                <div class="section-header">
-                    <h2>搜索历史</h2>
-                    <button class="clear-history">🗑</button>
-                </div>
-                <div class="history-tags">
-                </div>
-            </section>
 
-            <!-- 标签筛选 -->
-            <section class="search-filter-section">
-                <h3>标签</h3>
-                <div id="tags-loading" class="loading" style="display: none;">
-                    <div>🔄 加载标签中...</div>
-                    <div style="font-size: 12px; color: #999; margin-top: 5px;">首次加载可能较慢，请稍候</div>
-                </div>
-                <div id="tags-dimensions-container">
-                    <!-- 标签将通过JavaScript动态加载 -->
-                </div>
-            </section>
+    <!-- 搜索栏区域 -->
+    <div class="search-container-page">
+        <input id="searchInput" placeholder="搜索客户、组织等" type="text">
+        <button id="cancelBtn">取消</button>
+    </div>
 
-            <!-- 搜索结果 -->
-            <section class="search-results hidden">
-                <div class="search-results-header">
-                    <h3>客户 (0)</h3>
-                </div>
-                <div class="result-list">
-                    <!-- 搜索结果将通过JavaScript动态生成 -->
-                </div>
-            </section>
-        </main>
 
-        <!-- 底部导航 -->
-        <div class="bottom-navigation">
-            <div class="nav-item">
-                <img class="nav-icon" src="./image/home.svg" />
-                <div class="nav-label-active">首页</div>
-            </div>
-            <div class="nav-item" onclick="window.location.href='../customer/customer.html'" style="cursor: pointer;">
-                <img class="nav-icon" src="./image/customers.svg" width="22" height="22" />
-                <div class="nav-label">客户</div>
-            </div>
-            <div class="nav-item">
-                <img class="nav-icon" src="./image/optional.svg" width="22" height="22" />
-                <div class="nav-label">业绩</div>
-            </div>
-            <div class="nav-item">
-                <img class="nav-icon" src="./image/config.svg" width="22" height="22" />
-                <div class="nav-label">设置</div>
-            </div>
+    <!-- 搜索历史区域 -->
+    <div class="history-container">
+        <h3>搜索历史</h3>
+        <button class="trash-btn">
+            <img fill="currentColor" height="16" src="./image/trash.svg" viewBox="0 0 16 16" width="16"/>
+        </button>
+        <div class="history-tags">
+            <span class="tag">今日跟进10</span>
         </div>
     </div>
-    <script src="js/common.js"></script>
+
+    <!-- 标签区域 -->
+    <div class="tags-container">
+        <h3>标签</h3>
+        <div id="tags-loading" style="display: none;">正在加载标签...</div>
+        <div id="tags-dimensions-container"></div>
+        <div id="tags-error" style="display: none; color: red;"></div>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content-container">
+        <div class="search-content-section">
+            <h3>客户 (3)</h3>
+            <div class="search-content-item">
+
+                <img alt="头像" src="./image/avatar.png">
+                <div class="search-content-info">
+                    <div class="search-content-name">徐小二</div>
+                    <div class="search-content-organization"> |</div>
+                    <div class="search-content-contact">副食品批发</div>
+                    <div class="search-content-tags">
+                        <span class="search-content-tag-blue">大客户</span>
+                        <span class="search-content-tag-green">新客户</span>
+                        <span class="search-content-tag-orange">从未下单</span>
+                    </div>
+        </div>
+
+
+            </div>
+            <div class="search-content-item">
+                <img alt="头像" src="./image/customer.png">
+                <div class="search-content-info">
+                    <div class="search-content-name">徐小二</div>
+                    <div class="search-content-organization"> |</div>
+                    <div class="search-content-contact">副食品批发</div>
+                    <div class="search-content-tags">
+                        <span class="search-content-tag-blue">大客户</span>
+                        <span class="search-content-tag-green">新客户</span>
+                        <span class="search-content-tag-orange">从未下单</span>
+                    </div>
+        </div>
+            </div>
+            <div class="search-content-item">
+                <img alt="头像" src="./image/customer.png">
+                <div class="search-content-info">
+                    <div class="search-content-name">徐小二</div>
+                    <div class="search-content-organization"> |</div>
+                    <div class="search-content-contact">副食品批发</div>
+                    <div class="search-content-tags">
+                        <span class="search-content-tag-blue">大客户</span>
+                        <span class="search-content-tag-green">新客户</span>
+                        <span class="search-content-tag-orange">从未下单</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="search-content-section">
+          <h3>用户 (1)</h3>
+          <div class="search-content-item">
+            <img src="./image/customer.png" alt="头像">
+            <div class="search-content-info">
+              <div class="search-content-name">徐小二</div>
+              <div class="search-content-organization"> | </div>
+              <div class="search-content-contact">副食品批发</div>
+              <div class="search-content-tags">
+                <span class="search-content-tag-blue">大客户</span>
+                <span class="search-content-tag-green">新客户</span>
+                <span class="search-content-tag-orange">从未下单</span>
+              </div>
+            </div>
+          </div>
+        </div> -->
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-navigation">
+        <div class="nav-item" onclick="window.location.href='./index.html'" style="cursor: pointer;">
+            <img class="nav-icon" height="22" src="./image/home.png" width="22"/>
+            <div class="nav-label">首页</div>
+        </div>
+        <div class="nav-item">
+            <img class="nav-icon" height="22" src="./image/customer-select.png" width="22"/>
+            <div class="nav-label-active">客户</div>
+        </div>
+        <div class="nav-item">
+            <img class="nav-icon" height="22" src="./image/optional.svg" width="22"/>
+            <div class="nav-label">业绩</div>
+        </div>
+        <div class="nav-item">
+            <img class="nav-icon" height="22" src="./image/config.svg" width="22"/>
+            <div class="nav-label">设置</div>
+        </div>
+    </div>
+</div>
+<script src="./config.js"></script>
+<script src="./common.js"></script>
 </body>
+
 </html>

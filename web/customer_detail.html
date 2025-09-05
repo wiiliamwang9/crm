@@ -200,16 +200,16 @@
         <div class="detail-tabs-content">
             <div class="detail-tabs-content-h"></div>
             <div class="customer-tabs">
-                <div :class="'customer-tab ' + (tabIndex == 0 ? 'active':'')" @click="onTabChange(0)">跟踪记录</div>
-                <div :class="'customer-tab ' + (tabIndex == 1 ? 'active':'')" @click="onTabChange(1)">偏好</div>
-                <div :class="'customer-tab ' + (tabIndex == 2 ? 'active':'')" @click="onTabChange(2)">标签</div>
-                <div :class="'customer-tab ' + (tabIndex == 3 ? 'active':'')" @click="onTabChange(3)">熟人</div>
-                <div :class="'customer-tab ' + (tabIndex == 4 ? 'active':'')" @click="onTabChange(4)">资料</div>
-                <div :class="'customer-tab ' + (tabIndex == 5 ? 'active':'')" @click="onTabChange(5)">备注</div>
-                <div :class="'customer-tab ' + (tabIndex == 6 ? 'active':'')" @click="onTabChange(6)">会话</div>
+                <div class="customer-tab active">跟踪记录</div>
+                <div class="customer-tab">偏好</div>
+                <div class="customer-tab">标签</div>
+                <div class="customer-tab">熟人</div>
+                <div class="customer-tab">资料</div>
+                <div class="customer-tab">备注</div>
+                <div class="customer-tab">会话</div>
             </div>
             <!-- 资料 -->
-            <div :style="{display: tabIndex == 4 ? 'block' : 'none'}" class="detail-customer-tabs-content">
+            <div class="detail-customer-tabs-content">
                 <div class="detail-customer-order-item">
                     <div class="detail-customer-order-content">
                         <div class="detail-customer-info">
@@ -241,7 +241,7 @@
                 </div>
             </div>
             <!-- 会话 -->
-            <div :style="{display: tabIndex == 6 ? 'block' : 'none'}" class="detail-customer-tabs-content">
+            <div class="detail-customer-tabs-content" style="display: none;">
                 <div class="detail-customer-order-item">
                     <div class="detail-customer-order-content">
                         <div class="detail-customer-conversation">
@@ -256,7 +256,7 @@
                 </div>
             </div>
             <!-- 备注 -->
-            <div :style="{display: tabIndex == 5 ? 'block' : 'none'}" class="detail-customer-tabs-content">
+            <div class="detail-customer-tabs-content" style="display: none;">
                 <div class="detail-customer-order-item">
                     <div class="detail-customer-order-content">
                         <div class="detail-customer-remark">
@@ -267,7 +267,7 @@
                 </div>
             </div>
             <!-- 熟人 -->
-            <div :style="{display: tabIndex == 3 ? 'block' : 'none'}" class="detail-customer-tabs-content">
+            <div class="detail-customer-tabs-content" style="display: none;">
                 <div class="detail-customer-order-item">
                     <div class="detail-customer-order-content">
                         <div class="detail-customer-acquaintance">同事（1）</div>
@@ -322,7 +322,7 @@
                 </div>
             </div>
             <!-- 标签 -->
-            <div :style="{display: tabIndex == 2 ? 'block' : 'none'}" class="detail-customer-tabs-content">
+            <div class="detail-customer-tabs-content" style="display: none;">
                 <div class="detail-customer-order-item">
                     <div class="detail-customer-order-content">
                         <div class="detail-customer-order-menoy" style="align-items: start;">
@@ -360,7 +360,7 @@
                 </div>
             </div>
             <!-- 偏好 -->
-            <div :style="{display: tabIndex == 1 ? 'block' : 'none'}" class="detail-customer-tabs-content">
+            <div class="detail-customer-tabs-content" style="display: none;">
                 <div class="detail-customer-order-item">
                     <div class="detail-customer-order-content">
                         <div class="detail-customer-order-menoy" style="align-items: start;">
@@ -380,7 +380,7 @@
                 </div>
             </div>
             <!-- 跟踪记录 -->
-            <div :style="{display: tabIndex == 0 ? 'block' : 'none'}" class="detail-customer-tabs-content">
+            <div class="detail-customer-tabs-content" style="display: none;">
                 <div class="detail-customer-order">
                     <div class="detail-customer-order-item">
                         <div class="detail-customer-order-icon">

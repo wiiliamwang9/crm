@@ -4,42 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>客户信息管理</title>
-    <link rel="stylesheet" href="css/common.css">
+    <link href="https://fastly.jsdelivr.net/npm/vant@4/lib/index.css" rel="stylesheet"/>
+    <link href="./common.css" rel="stylesheet">
+    <script src="./js/global.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/vant@4/lib/vant.min.js"></script>
+    <script src="./js/axios.min.js"></script>
+    <script src="./config.js"></script>
 </head>
 <body>
-    <div class="container">
+<div class="container" id="app">
+    <div class="tip-box">
+        <div class="tip-icon">
+            <img alt="" src="./image/alert-circle.png">
+        </div>
+        <div class="tip-content">本系统为体验版，请不要正式使用！</div>
+        <div class="tip-icon">
+            <img alt="" src="./image/x.png">
+        </div>
+    </div>
         <!-- 头部区域 -->
         <header class="header">
             <div class="user-info">
                 <div class="avatar-container">
                     <div class="avatar">
-                        <img src="./image/avatar.png" alt="">
+                        <img alt="" src="./image/avatar.png">
                         <span class="crown">
-                            <img src="./image/crown.png" alt="">
+                            <img alt="" src="./image/crown.png">
                         </span>
                     </div>
-                    
+
                 </div>
                 <div class="user-details">
                     <div class="username">
-                        <p>徐小二</p>
+                        <p>{{userInfo && userInfo.name ? userInfo.name : ''}}</p>
                         <p>|</p>
-                        <p>四川一手货源</p>
+                        <p>{{userInfo && userInfo.display_info ? userInfo.display_info : ''}}</p>
                     </div>
                     <div class="stats">
-                        <span class="stat-item">今日营业额 10</span>
-                        <span class="stat-item">今日跟进 10</span>
+                        <span class="stat-item">今日营业额 {{userInfo && userInfo.today_revenue ? userInfo.today_revenue : 0}}</span>
+                        <span class="stat-item">今日跟进 {{userInfo && userInfo.today_follows ? userInfo.today_follows : 0}}</span>
                     </div>
                 </div>
             </div>
-            
+
             <!-- 搜索框 -->
             <div class="search-container">
                 <div class="search-box">
                     <span class="search-icon">
-                        <img src="./image/search.png" alt="">
+                        <img alt="" src="./image/search.png">
                     </span>
-                    <input type="text" placeholder="搜索客户...">
+                    <input placeholder="搜索客户..." type="text">
                 </div>
             </div>
         </header>
@@ -50,24 +64,292 @@
             <div class="follow-up-header">
                 <div class="left-section">
                     <span class="file-icon">
-                        <img src="./image/record.png" alt="">
+                        <img alt="" src="./image/record.png">
                     </span>
                     <p>今日待跟进</p>
-                    <span class="badge">20</span>
+                    <span class="badge">{{todayTotal}}</span>
                 </div>
                 <div class="view-all"><span>查看全部</span>
-                    <img src="./image/chevrons-right.png" alt="">
+                    <img alt="" src="./image/chevrons-right.png">
 
                 </div>
             </div>
 
             <!-- 导航标签 -->
             <div class="nav-tabs">
-                <button class="tab-btn active">全部</button>
-                <button class="tab-btn">待办</button>
-                <button class="tab-btn">定期</button>
-                <button class="tab-btn">已发样</button>
-                <button class="tab-btn">已发货</button>
+                <button :class="'tab-btn ' + (todayIndex == 0 ? 'active':'')" @click="onTodayChange(0)">全部</button>
+                <button :class="'tab-btn ' + (todayIndex == 1 ? 'active':'')" @click="onTodayChange(1)">待办</button>
+                <button :class="'tab-btn ' + (todayIndex == 2 ? 'active':'')" @click="onTodayChange(2)">定期</button>
+                <button :class="'tab-btn ' + (todayIndex == 3 ? 'active':'')" @click="onTodayChange(3)">已发样</button>
+                <button :class="'tab-btn ' + (todayIndex == 4 ? 'active':'')" @click="onTodayChange(4)">已发货</button>
+            </div>
+
+            <!-- 客户列表 -->
+            <div class="customer-list">
+                <!-- 客户项目1 -->
+                <div :key="item.customer_id" @click="onRead(item.customer_id)" class="customer-item"
+                     style="cursor: pointer;" v-for="(item,index) in todayList">
+                    <div class="customer-avatar">
+                        <img alt="" src="./image/avatar.png">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                <p>{{item.contact_name}}</p>
+                                <p class="line">|</p>
+                                <p class="title">{{item.customer_name}}</p>
+                            </div>
+                            <div class="time-icon">
+                                <img alt="" src="./image/clock.png">
+                            </div>
+                        </div>
+                        <div class="customer-tags" v-if="item.tags && item.tags.length > 0">
+                            <span :class="'tag '+tagColor[getRandomIntInclusive(0,2)]" :key="idx"
+                                  v-for="(it,idx) in item.tags">{{it}}</span>
+                            <!-- <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span> -->
+                        </div>
+                        <p class="customer-note">{{item.todo_contents}}</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img alt="" src="./image/Vector.png">
+                                <span>发微信</span>
+                            </button>
+                            <div class="more-btn" @click="onMoreClick(item.customer_id)">
+                                <img alt="" src="./image/Frame.png">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                <p>徐小二</p>
+                                <p class="line">|</p>
+                                <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+                <!-- <div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                <p>徐小二</p>
+                                <p class="line">|</p>
+                                <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+
+            <!-- 近期待跟进 -->
+            <div class="follow-up-header">
+                <div class="left-section">
+                    <span class="file-icon">
+                        <img alt="" src="./image/calendar.png">
+                    </span>
+                    <p>近期待跟进</p>
+                    <span class="badge">{{upcomingTotal}}</span>
+                </div>
+                <div class="view-all"><span>查看全部</span>
+                    <img alt="" src="./image/chevrons-right.png">
+                </div>
+            </div>
+
+            <!-- 导航标签 -->
+            <div class="nav-tabs">
+                <button :class="'tab-btn ' + (upcomingIndex == 0 ? 'active':'')" @click="onUpcomingChange(0)">全部
+                </button>
+                <button :class="'tab-btn ' + (upcomingIndex == 1 ? 'active':'')" @click="onUpcomingChange(1)">
+                    半年未下单
+                </button>
+                <button :class="'tab-btn ' + (upcomingIndex == 2 ? 'active':'')" @click="onUpcomingChange(2)">
+                    一直未下单
+                </button>
+            </div>
+
+            <!-- 客户列表 -->
+            <div class="customer-list">
+                <!-- 客户项目1 -->
+                <div :key="item.customer_id" @click="onRead(item.customer_id)" class="customer-item"
+                     style="cursor: pointer;" v-for="(item,index) in upcomingList">
+                    <div class="customer-avatar">
+                        <img alt="" src="./image/avatar.png">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                <p>{{item.contact_name}}</p>
+                                <p class="line">|</p>
+                                <p class="title">{{item.customer_name}}</p>
+                            </div>
+                            <div class="time-icon">
+                                <img alt="" src="./image/clock.png">
+                            </div>
+                        </div>
+                        <div class="customer-tags" v-if="item.tags && item.tags.length > 0">
+                            <span :class="'tag '+tagColor[getRandomIntInclusive(0,2)]" :key="idx"
+                                  v-for="(it,idx) in item.tags">{{it}}</span>
+                            <!-- <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span> -->
+                        </div>
+                        <!-- <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div> -->
+                        <p class="customer-note">{{item.todo_contents}}</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img alt="" src="./image/Vector.png">
+                                <span>发微信</span>
+                            </button>
+                            <div class="more-btn" @click="onMoreClick(item.customer_id)">
+                                <img alt="" src="./image/Frame.png">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                <p>徐小二</p>
+                                <p class="line">|</p>
+                                <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+
+                <!-- <div class="customer-item">
+                    <div class="customer-avatar">
+                        <img src="./image/avatar.png" alt="">
+                    </div>
+                    <div class="customer-info">
+                        <div class="customer-header">
+                            <div class="customer-name">
+                                <p>徐小二</p>
+                                <p class="line">|</p>
+                                <p class="title">副食品批发</p>
+                            </div>
+                            <div class="time-icon">
+                                <img src="./image/clock.png" alt="">
+                            </div>
+                        </div>
+                        <div class="customer-tags">
+                            <span class="tag big-customer">大客户</span>
+                            <span class="tag new-customer">新客户</span>
+                            <span class="tag never-ordered">从未下单</span>
+                        </div>
+                        <p class="customer-note">昨天约了今天电话</p>
+                        <div class="action-buttons">
+                            <button class="wechat-btn">
+                                <img src="./image/Vector.png" alt="">
+                                <span>发微信</span>
+                                </button>
+                            <div class="more-btn">
+                                <img src="./image/Frame.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+
+            <!-- 业绩排名 -->
+            <div class="follow-up-header">
+                <div class="left-section">
+                    <span class="file-icon">
+                        <img alt="" src="./image/bar-chart.png">
+                    </span>
+                    <p>业绩排名</p>
+                    <span class="badge">20</span>
+                </div>
+                <div class="view-all"><span>查看全部</span>
+                    <img alt="" src="./image/chevrons-right.png">
+                </div>
+            </div>
+
+            <!-- 导航标签 -->
+            <div style="display: flex;">
+                <div class="nav-tabs">
+                    <button class="tab-btn active">今日</button>
+                    <button class="tab-btn">昨日</button>
+                    <button class="tab-btn">本月</button>
+                    <button class="tab-btn">上月</button>
+                </div>
+                <div style="flex: 1;"></div>
+                <div class="nav-tabs">
+                    <button class="tab-btn active">本团队</button>
+                    <button class="tab-btn">全公司</button>
+                </div>
             </div>
 
             <!-- 客户列表 -->
@@ -75,17 +357,17 @@
                 <!-- 客户项目1 -->
                 <div class="customer-item">
                     <div class="customer-avatar">
-                        <img src="./image/avatar.png" alt="">
+                        <img alt="" src="./image/avatar.png">
                     </div>
                     <div class="customer-info">
                         <div class="customer-header">
                             <div class="customer-name">
-                                   <p>徐小二</p>
-                        <p class="line">|</p>
-                        <p class="title">副食品批发</p>
+                                <p>徐小二</p>
+                                <p class="line">|</p>
+                                <p class="title">副食品批发</p>
                             </div>
-                            <div class="time-icon">
-                                <img src="./image/clock.png" alt="">
+                            <div class="ranking-text">
+                                第&nbsp;1&nbsp;名
                             </div>
                         </div>
                         <div class="customer-tags">
@@ -96,28 +378,28 @@
                         <p class="customer-note">昨天约了今天电话</p>
                         <div class="action-buttons">
                             <button class="wechat-btn">
-                                <img src="./image/Vector.png" alt="">
+                                <img alt="" src="./image/Vector.png">
                                 <span>发微信</span>
-                                </button>
-                            <div class="more-btn">
-                                <img src="./image/Frame.png" alt="">
+                            </button>
+                            <div class="more-btn" @click="onMoreClick(1)">
+                                <img alt="" src="./image/Frame.png">
                             </div>
                         </div>
                     </div>
                 </div>
-<div class="customer-item">
+                <div class="customer-item">
                     <div class="customer-avatar">
-                        <img src="./image/avatar.png" alt="">
+                        <img alt="" src="./image/avatar.png">
                     </div>
                     <div class="customer-info">
                         <div class="customer-header">
                             <div class="customer-name">
-                                   <p>徐小二</p>
-                        <p class="line">|</p>
-                        <p class="title">副食品批发</p>
+                                <p>徐小二</p>
+                                <p class="line">|</p>
+                                <p class="title">副食品批发</p>
                             </div>
-                            <div class="time-icon">
-                                <img src="./image/clock.png" alt="">
+                            <div class="ranking-text">
+                                第&nbsp;2&nbsp;名
                             </div>
                         </div>
                         <div class="customer-tags">
@@ -128,11 +410,11 @@
                         <p class="customer-note">昨天约了今天电话</p>
                         <div class="action-buttons">
                             <button class="wechat-btn">
-                                <img src="./image/Vector.png" alt="">
+                                <img alt="" src="./image/Vector.png">
                                 <span>发微信</span>
-                                </button>
-                            <div class="more-btn">
-                                <img src="./image/Frame.png" alt="">
+                            </button>
+                            <div class="more-btn" @click="onMoreClick(2)">
+                                <img alt="" src="./image/Frame.png">
                             </div>
                         </div>
                     </div>
@@ -141,17 +423,17 @@
 
                 <div class="customer-item">
                     <div class="customer-avatar">
-                        <img src="./image/avatar.png" alt="">
+                        <img alt="" src="./image/avatar.png">
                     </div>
                     <div class="customer-info">
                         <div class="customer-header">
                             <div class="customer-name">
-                                   <p>徐小二</p>
-                        <p class="line">|</p>
-                        <p class="title">副食品批发</p>
+                                <p>徐小二</p>
+                                <p class="line">|</p>
+                                <p class="title">副食品批发</p>
                             </div>
-                            <div class="time-icon">
-                                <img src="./image/clock.png" alt="">
+                            <div class="ranking-text">
+                                第&nbsp;3&nbsp;名
                             </div>
                         </div>
                         <div class="customer-tags">
@@ -162,157 +444,113 @@
                         <p class="customer-note">昨天约了今天电话</p>
                         <div class="action-buttons">
                             <button class="wechat-btn">
-                                <img src="./image/Vector.png" alt="">
+                                <img alt="" src="./image/Vector.png">
                                 <span>发微信</span>
-                                </button>
-                            <div class="more-btn">
-                                <img src="./image/Frame.png" alt="">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-               
-            </div>
-
-            <!-- 近期待跟进 -->
-            <div class="follow-up-header">
-                <div class="left-section">
-                    <span class="file-icon">
-                        <img src="./image/record.png" alt="">
-                    </span>
-                    <p>近期待跟进</p>
-                    <span class="badge">20</span>
-                </div>
-                <div class="view-all"><span>查看全部</span>
-                    <img src="./image/chevrons-right.png" alt="">
-
-                </div>
-            </div>
-
-            <!-- 客户列表 -->
-                <div class="customer-list">
-                <!-- 客户项目1 -->
-                <div class="customer-item">
-                    <div class="customer-avatar">
-                        <img src="./image/avatar.png" alt="">
-                    </div>
-                    <div class="customer-info">
-                        <div class="customer-header">
-                            <div class="customer-name">
-                                   <p>徐小二</p>
-                        <p class="line">|</p>
-                        <p class="title">副食品批发</p>
-                            </div>
-                            <div class="time-icon">
-                                <img src="./image/clock.png" alt="">
-                            </div>
-                        </div>
-                        <div class="customer-tags">
-                            <span class="tag big-customer">大客户</span>
-                            <span class="tag new-customer">新客户</span>
-                            <span class="tag never-ordered">从未下单</span>
-                        </div>
-                        <p class="customer-note">昨天约了今天电话</p>
-                        <div class="action-buttons">
-                            <button class="wechat-btn">
-                                <img src="./image/Vector.png" alt="">
-                                <span>发微信</span>
-                                </button>
-                            <div class="more-btn">
-                                <img src="./image/Frame.png" alt="">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-<div class="customer-item">
-                    <div class="customer-avatar">
-                        <img src="./image/avatar.png" alt="">
-                    </div>
-                    <div class="customer-info">
-                        <div class="customer-header">
-                            <div class="customer-name">
-                                   <p>徐小二</p>
-                        <p class="line">|</p>
-                        <p class="title">副食品批发</p>
-                            </div>
-                            <div class="time-icon">
-                                <img src="./image/clock.png" alt="">
-                            </div>
-                        </div>
-                        <div class="customer-tags">
-                            <span class="tag big-customer">大客户</span>
-                            <span class="tag new-customer">新客户</span>
-                            <span class="tag never-ordered">从未下单</span>
-                        </div>
-                        <p class="customer-note">昨天约了今天电话</p>
-                        <div class="action-buttons">
-                            <button class="wechat-btn">
-                                <img src="./image/Vector.png" alt="">
-                                <span>发微信</span>
-                                </button>
-                            <div class="more-btn">
-                                <img src="./image/Frame.png" alt="">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="customer-item">
-                    <div class="customer-avatar">
-                        <img src="./image/avatar.png" alt="">
-                    </div>
-                    <div class="customer-info">
-                        <div class="customer-header">
-                            <div class="customer-name">
-                                   <p>徐小二</p>
-                        <p class="line">|</p>
-                        <p class="title">副食品批发</p>
-                            </div>
-                            <div class="time-icon">
-                                <img src="./image/clock.png" alt="">
-                            </div>
-                        </div>
-                        <div class="customer-tags">
-                            <span class="tag big-customer">大客户</span>
-                            <span class="tag new-customer">新客户</span>
-                            <span class="tag never-ordered">从未下单</span>
-                        </div>
-                        <p class="customer-note">昨天约了今天电话</p>
-                        <div class="action-buttons">
-                            <button class="wechat-btn">
-                                <img src="./image/Vector.png" alt="">
-                                <span>发微信</span>
-                                </button>
-                            <div class="more-btn">
-                                <img src="./image/Frame.png" alt="">
+                            </button>
+                            <div class="more-btn" @click="onMoreClick(3)">
+                                <img alt="" src="./image/Frame.png">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
-        
-        <!-- 底部导航 -->
+
+    <!-- 底部导航 -->
         <div class="bottom-navigation">
             <div class="nav-item">
-                <img class="nav-icon" src="./image/home.svg" />
+                <img class="nav-icon" height="22" src="./image/home-select.png" width="22"/>
                 <div class="nav-label-active">首页</div>
             </div>
-            <div class="nav-item" onclick="window.location.href='../customer/customer.html'" style="cursor: pointer;">
-                <img class="nav-icon" src="./image/customers.svg" width="22" height="22" />
+            <div class="nav-item" onclick="window.location.href='./customers.html'" style="cursor: pointer;">
+                <img class="nav-icon" height="22" src="./image/customer.png" width="22"/>
                 <div class="nav-label">客户</div>
             </div>
             <div class="nav-item">
-                <img class="nav-icon" src="./image/optional.svg" width="22" height="22" />
+                <img class="nav-icon" height="22" src="./image/optional.svg" width="22"/>
                 <div class="nav-label">业绩</div>
             </div>
             <div class="nav-item">
-                <img class="nav-icon" src="./image/config.svg" width="22" height="22" />
+                <img class="nav-icon" height="22" src="./image/config.svg" width="22"/>
                 <div class="nav-label">设置</div>
             </div>
         </div>
+    
+    <!-- 操作菜单弹窗 -->
+    <div v-if="showActionMenu" class="popup-overlay" @click="showActionMenu = false">
+        <div class="action-menu" @click.stop>
+            <div class="action-item" @click="onAddTodo">
+                <img src="./image/record.png" alt="">
+                <span>加待办</span>
+            </div>
+            <div class="action-item" @click="onSOS">
+                <img src="./image/alert-circle.png" alt="">
+                <span>SOS求助</span>
+            </div>
+            <div class="action-item call-item" @click="onCall">
+                 <img src="./image/Vector.png" alt="">
+                 <span>打电话</span>
+             </div>
+        </div>
     </div>
-    <script src="../js/common.js"></script>
+    
+    <!-- 加待办弹窗 -->
+    <div v-if="showTodoDialog" class="popup-overlay">
+        <div class="popup-box1">
+            <div class="popup-header">
+                <h3>为客户添加待办</h3>
+                <div class="popup-box1-close" @click="showTodoDialog = false">
+                    <img src="./image/x1.png" alt="">
+                </div>
+            </div>
+            <div class="popup-content">
+                <div class="form-group">
+                    <label>待办内容</label>
+                    <textarea placeholder="请输入待办内容" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>提醒时间</label>
+                    <input type="datetime-local">
+                </div>
+            </div>
+            <div class="popup-footer">
+                <button class="btn-cancel" @click="showTodoDialog = false">取消</button>
+                <button class="btn-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SOS求助弹窗 -->
+    <div v-if="showSOSDialog" class="popup-overlay">
+        <div class="popup-box1">
+            <div class="popup-header">
+                <h3>SOS求助</h3>
+                <div class="popup-box1-close" @click="showSOSDialog = false">
+                    <img src="./image/x1.png" alt="">
+                </div>
+            </div>
+            <div class="popup-content">
+                <div class="form-group">
+                    <label>求助内容</label>
+                    <textarea placeholder="请描述需要帮助的问题" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>紧急程度</label>
+                    <select>
+                        <option value="high">高</option>
+                        <option value="medium">中</option>
+                        <option value="low">低</option>
+                    </select>
+                </div>
+            </div>
+            <div class="popup-footer">
+                <button class="btn-cancel" @click="showSOSDialog = false">取消</button>
+                <button class="btn-confirm">发送求助</button>
+            </div>
+        </div>
+    </div>
+    
+    </div>
 </body>
+<script src="./js/comm.js"></script>
 </html>
